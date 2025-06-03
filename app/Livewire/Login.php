@@ -31,14 +31,30 @@ class Login extends Component
             'password.required' => 'Password tidak boleh kosong.',
         ]);
 
+        $user = User::where('username', $this->username)->first();
 
-        if (Auth::attempt([
-            'username' => $this->username,
-            'password' => $this->password
-        ])) {
-            session()->flash('message', 'Login berhasil!');
-            return redirect()->route('dashboard');
+        if ($user && Hash::check($this->password, $user->password)) {
+            if ($user->status === 'pending_admin_verification') {
+                session()->flash('error', 'Lakukan pembayaran terlebih dahulu dan tunggu admin melakukan verifikasi.');
+                return;
+            }
+            
+            if ($user->status === 'frozen') {
+                session()->flash('error', 'Masa membership telah habis, lakukan pembayaran bulan ini dan tunggu proses verifikasi.');
+                return;
+            }
+            
+            if ($user->status === 'inactive') {
+                session()->flash('error', 'Akun anda telah dinonaktifkan. Lakukan pembayaran bulanan untuk mengaktifkan akun kembali.');
+                return;
+            }
+            
+            Auth::login($user);
+            return redirect()->intended('/dashboard');
+        } else{
+            
         }
+        
 
         session()->flash('error', 'Username atau password salah.');
     }

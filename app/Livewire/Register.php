@@ -24,6 +24,7 @@ class Register extends Component
     public $nomor_telepon;
     public $password;
 
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'username' => 'required|string|max:255|unique:users',

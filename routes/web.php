@@ -14,5 +14,7 @@ Route::get('/email/verify/{token}', [\App\Http\Controllers\EmailVerificationCont
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
 
+    Route::get('/kelola-pendapatan', \App\Livewire\KelolaPendapatan::class)->name('kelola.pendapatan');
+
     Route::get('/logout', [\App\Livewire\Login::class, 'logout'])->name('logout');
 });

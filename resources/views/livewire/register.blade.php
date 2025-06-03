@@ -7,14 +7,13 @@
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-center mb-2">Buat Akun Barumu</h2>
             <p class="text-center text-warna-300">Bergabung bersama kami untuk mendapatkan akses ekslusif di GYMYAKARTA</p>
         </div>
-
          @if (session()->has('success'))
-            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-                {{ session('success') }}
+            <div class="mb-7 py-2 px-4 bg-green-100 border-l-2 border-green-400 text-green-700 rounded">
+               {{ session('success') }}
             </div>
         @endif
         @if (session()->has('error'))
-            <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            <div class="mb-4 py-2 px-4 bg-red-100 border-l-2 border-red-400 text-red-700 rounded">
                 {{ session('error') }}
             </div>
         @endif
@@ -79,9 +78,17 @@
 
            
             <button
-                    class="mt-10 w-full py-2 px-4 bg-warna-400 text-white font-semibold rounded-md hover:bg-warna-500 focus:outline-none active:scale-95 transition-all duration-200">
-                Register
+                type="submit"
+                wire:loading.attr="disabled"
+                wire:target="register"
+                class="mt-10 w-full py-2 px-4 bg-warna-400 text-white font-semibold rounded-md hover:bg-warna-500 focus:outline-none active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ">
+                
+                <i wire:loading wire:target="register" class="fas fa-spinner fa-spin mr-2"></i>
+
+                <span wire:loading.remove wire:target="register">Register</span>
+                <span wire:loading wire:target="register">Mendaftar...</span>
             </button>
+
             <p class="mt-4 text-sm">Sudah punya akun? 
                 <a href="{{ route('login') }}" class="text-warna-400 hover:underline">Masuk</a>
             </p>

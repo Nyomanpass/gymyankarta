@@ -8,8 +8,13 @@
             <p class="text-center text-warna-300">Silahkan login untuk mendapatkan akses ekslusif di GYMYAKARTA</p>
         </div>
         @if (session()->has('success'))
-            <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+            <div class="mb-4 px-4 py-2 bg-green-100 border border-green-400 text-green-700 rounded">
                 {{ session('success') }}
+            </div>
+        @endif
+        @if (session()->has('error'))
+            <div class="mb-4 px-4 py-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                {{ session('error') }}
             </div>
         @endif
         <form wire:submit.prevent="login">          
