@@ -18,9 +18,9 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('nomor_telepon');
+            $table->string('nomor_telepon')->nullable();
             $table->ENUM('role', ['admin', 'member'])->default('member');
-            $table->ENUM('status', ['pending', 'active', 'frozen'])->default('pending');
+            $table->ENUM('status', ['pending_email_verification', 'pending_admin_verification', 'active', 'frozen', 'inactive'])->default('pending');
             $table->rememberToken();
             $table->timestamps();
         });
