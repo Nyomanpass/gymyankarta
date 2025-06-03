@@ -34,10 +34,11 @@
         <select
             id="{{ $id ?? $name }}"
             name="{{ $name }}"
+            wire:model="{{ $wireModel ?? $name }}"
             class="block w-full px-3 py-2 md:py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-warna-400 focus:border-warna-400 sm:text-sm  {{ $class }}"
             {{ $attributes }}
         >
-            <option  value="" disabled>Pilih {{ $label }}</option>
+            <option value="" disabled selected>Pilih {{ $label }}</option>
             @foreach($options ?? [] as $optionValue => $optionLabel)
                 <option class="py-3" value="{{ $optionValue }}">{{ $optionLabel }}</option>
             @endforeach

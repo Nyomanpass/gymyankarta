@@ -6,7 +6,6 @@
       <title>Dashboard GYMYANKARTA</title>
       @vite(['resources/css/app.css', 'resources/js/app.js'])
       @livewireStyles
-      <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="font-roboto text-warna-300 " x-data="{ sidebarOpen: false }">
       <div class="min-h-screen bg-gray-100">
@@ -158,7 +157,7 @@
 
 
 
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
       @livewireScripts
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
 </body>
 </html>
