@@ -14,9 +14,13 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->string('nomor_telepon')->nullable();
+            $table->ENUM('role', ['admin', 'member'])->default('member');
+            $table->ENUM('status', ['pending_email_verification', 'pending_admin_verification', 'active', 'frozen', 'inactive'])->default('pending');
             $table->rememberToken();
             $table->timestamps();
         });

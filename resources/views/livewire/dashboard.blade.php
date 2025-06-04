@@ -1,5 +1,5 @@
-<x-layout>
-<div class="grid grid-cols-3 gap-4 mb-6">
+<div>
+    <div class="grid grid-cols-3 gap-4 mb-6">
   <div class="bg-gray-100 border border-gray-400 p-4 rounded-lg flex items-center space-x-3">
     <ion-icon name="people-outline" class="text-3xl text-blue-500"></ion-icon>
     <div>
@@ -46,4 +46,4 @@
             },
         });
     </script>
-</x-layout>
+</div>
