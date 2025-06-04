@@ -15,6 +15,7 @@ class KelolaPendapatan extends Component
     public $tipe_pendapatan = '';
     public $jumlah_pendapatan = null;
     public $deskripsi = null;
+    public $total_pendapatan = null;
 
     public function mount()
     {
@@ -22,9 +23,16 @@ class KelolaPendapatan extends Component
     }
     public function render()
     {
+        $this->total_pendapatan = Transaksi::whereDate('tanggal_transaksi', now())
+            ->sum('jumlah_pendapatan');
         return view('livewire.kelola-pendapatan', [
             'transaksi_hari_ini' => Transaksi::whereDate('tanggal_transaksi', now())->get(),
         ]);
+    }
+
+    public function checkLivewire()
+    {
+        dd('Livewire is working!');
     }
 
     public function save()
