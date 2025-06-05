@@ -13,13 +13,16 @@ class AdminSeeder extends Seeder
     {
         User::create([
             'name' => 'Admin GymYakarta',
-            'email' => 'admin@admin.com',
             'username' => 'admin',
+            'email' => 'admin@admin.com',
+            'email_verified_at' => now(),
             'password' => Hash::make('admin'),
+            'nomor_telepon' => '081234567890',
             'role' => 'admin',
             'status' => 'active',
-            'email_verified_at' => now(),
-            'nomor_telepon' => '081234567890',
+            'member_type' => 'local',
+            'membership_started_date' => now(),
+            'membership_expiration_date' => now()->addYear(),
         ]);
     }
 }

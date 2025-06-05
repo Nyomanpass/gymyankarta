@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('table_transaksi', function (Blueprint $table) {
+        Schema::create('attendances', function (Blueprint $table) {
             $table->id();
-            $table->datetime('tanggal_transaksi');
-            $table->enum('tipe_pendapatan', ['pembayanan_membership', 'pengunjung_harian', 'pendapatan lainnya']);
-            $table->decimal('jumlah_pendapatan', 15, 2);
-            $table->string('deskripsi');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->timestamp('check_in_datetime');
             $table->timestamps();
+
+            $table->index(['user_id', 'check_in_datetime']);
+            $table->index('check_in_datetime');
         });
     }
 
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('table_transaksi');
+        Schema::dropIfExists('attendances');
     }
 };

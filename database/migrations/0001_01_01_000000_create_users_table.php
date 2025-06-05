@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('nomor_telepon')->nullable();
             $table->ENUM('role', ['admin', 'member'])->default('member');
             $table->ENUM('status', ['pending_email_verification', 'pending_admin_verification', 'active', 'frozen', 'inactive'])->default('pending');
+            $table->ENUM('member_type', ['local', 'foreign'])->nullable();
+            $table->date('membership_started_date')->nullable();
+            $table->date('membership_expiration_date')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
