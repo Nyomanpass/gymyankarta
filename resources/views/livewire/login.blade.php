@@ -33,8 +33,12 @@
             </div>
 
             <button type="submit"
-                    class="mt-10 w-full py-2 px-4 bg-warna-400 text-white font-semibold rounded-md hover:bg-warna-500 focus:outline-none active:scale-95 transition-all duration-200">
-                Login
+                    class="mt-10 w-full py-2 px-4 bg-warna-400 text-white font-semibold rounded-md hover:bg-warna-500 focus:outline-none active:scale-95 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    wire:loading.attr="disabled">
+                <span wire:loading.remove>Login</span>
+                <div wire:loading class="">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                </div>
             </button>
             <p class="mt-4 text-sm">Belum punya akun? 
                 <a href="{{ route('register') }}" class="text-warna-400 hover:underline">Daftar Sekarang</a>

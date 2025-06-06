@@ -22,7 +22,7 @@ class AdminSeeder extends Seeder
             'status' => 'active',
             'member_type' => 'local',
             'membership_started_date' => now(),
-            'membership_expiration_date' => now()->addYear(),
+            'membership_expiration_date' => now()->addYears(3),
         ]);
     }
 }

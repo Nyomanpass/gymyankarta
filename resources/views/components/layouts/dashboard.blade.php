@@ -7,7 +7,7 @@
       @vite(['resources/css/app.css', 'resources/js/app.js'])
       @livewireStyles
 </head>
-<body class="font-roboto text-warna-300 " x-data="{ sidebarOpen: false }">
+<body class="font-poppins text-warna-300 " x-data="{ sidebarOpen: false }">
       <div class="min-h-screen bg-gray-100">
             <!-- Navigation -->
             <nav class="fixed top-0 left-0 right-0 z-40 h-16 bg-warna-50 border-b border-warna-100 shadow-sm">
@@ -33,14 +33,15 @@
                               <div class="flex items-center">
                                     <p class="font-medium text-warna-300">Halo, {{ Auth::user()->name }}</p>
                               </div>
+
                         </div>
                   </div>
             </nav>
 
             <!-- Main Layout -->
-            <div class="flex pt-16">
+            <div class="flex pt-16 lg:gap-3">
                   <!-- Sidebar -->
-                  <aside class="hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-warna-300 shadow-lg overflow-y-auto">
+                  <aside class="hidden lg:block left-0 top-16 h-[calc(100vh-4rem)] w-70 bg-warna-300 shadow-lg overflow-y-auto">
                         <div class="p-4 mt-3">
                               <nav class="space-y-3">
                                     <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('dashboard') ? 'bg-warna-400' : '' }}">
@@ -52,7 +53,7 @@
                                           <i class="fa-solid fa-money-bill-trend-up mr-3"></i>
                                           <span>Kasir</span>
                                     </a>
-                                    <a href="#" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
+                                    <a href="{{ route('kelola.member') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                                           <i class="fa-solid fa-user mr-3"></i>
                                           <span>Kelola Member</span>
                                     </a>
@@ -60,32 +61,21 @@
                                           <i class="fa-solid fa-gear mr-3"></i>
                                           <span>Settings</span>
                                     </a>
-                                    <a href="#" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
+                                    <a href="{{ route('logout') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                                           <i class="fa-solid fa-right-from-bracket mr-3"></i>
                                           <span>Logout</span>
                                     </a>
-                                    <!-- Add more navigation items here -->
                               </nav>
                         </div>
                   </aside>
 
                   <!-- Main Content -->
-                  <main class="flex-1 lg:ml-64">
-                        <div class="p-6 bg-gray-100 min-h-[calc(100vh-4rem)]">
+                  <main class="w-full transition-all duration-200">
+                        <div class="p-4 sm:p-6 bg-gray-100 min-h-[calc(100vh-4rem)]">
                               {{ $slot }}
                         </div>
                   </main>
             </div>
-
-            <!-- Mobile Sidebar Toggle (alter1) -->
-            {{-- <div class="md:hidden fixed top-1/2 transform -translate-y-1/2 left-2 z-50 h-[95dvh] bg-warna-300 rounded-lg flex flex-col items-center py-10 px-4 shadow-lg text-white ">
-                  <i class="fa-solid fa-bars text-2xl mb-15"></i>
-                  <i class="fa-solid fa-house text-2xl mb-12"></i>
-                  <i class="fa-solid fa-user text-2xl mb-12"></i>
-                  <i class="fa-solid fa-money-bill-trend-up text-2xl mb-12"></i>
-                  <i class="fa-solid fa-gear text-2xl mb-12"></i>
-                  <i class="fa-solid fa-right-from-bracket text-2xl mb-12"></i>
-            </div> --}}
 
             <!-- -- Mobile Sidebar Toggle (alter2) -->
             <div x-show="sidebarOpen" 
@@ -145,7 +135,7 @@
                               <i class="fa-solid fa-gear mr-3"></i>
                               <span>Settings</span>
                         </a>
-                        <a href="#" 
+                        <a href="{{ route('logout') }}" 
                            @click="sidebarOpen = false"
                            class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                               <i class="fa-solid fa-right-from-bracket mr-3"></i>

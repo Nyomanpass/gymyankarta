@@ -16,5 +16,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/kelola-pendapatan', \App\Livewire\KelolaPendapatan::class)->name('kelola.pendapatan');
 
+    Route::get('/kelola-member', \App\Livewire\KelolaMember::class)->name('kelola.member');
+
     Route::get('/logout', [\App\Livewire\Login::class, 'logout'])->name('logout');
 });
