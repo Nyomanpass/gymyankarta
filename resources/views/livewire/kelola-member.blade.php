@@ -384,6 +384,11 @@
                             Hapus Member
                             <div class="tooltip-arrow" data-popper-arrow></div>
                         </div>
+
+                        <!-- testing only. HAPUS KALO UDAH MASUK PRODUCTION -->
+                        <button wire:click="testAbsen" class="text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                            TES ABSEN
+                        </button>
                         
                         <button @click="show = false"  type="button" wire:click="closeInputModal()" class="px-5 lg:px-7 py-2 bg-gray-300 hover:bg-gray-300/80 active:scale-95 transition-all text-gray-700 rounded-lg mr-2">Tutup</button>
                     </div>
