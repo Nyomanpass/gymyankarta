@@ -12,9 +12,19 @@ Route::get('/email/verify/{token}', [\App\Http\Controllers\EmailVerificationCont
 
 // Protected routes
 Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+    Route::middleware(['role:member'])->group(function () {
+        Route::get('/dashboard-member', \App\Livewire\DashboardMember::class)->name('dashboard.member');
+    });
 
-    Route::get('/kelola-pendapatan', \App\Livewire\KelolaPendapatan::class)->name('kelola.pendapatan');
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/dashboard', \App\Livewire\Dashboard::class)->name('dashboard');
+
+        Route::get('/kelola-pendapatan', \App\Livewire\KelolaPendapatan::class)->name('kelola.pendapatan');
+
+        Route::get('/kelola-member', \App\Livewire\KelolaMember::class)->name('kelola.member');
+
+        ROute::get('/pengaturan-harga', \App\Livewire\PengaturanHarga::class)->name('pengaturan.harga');
+    });
 
     Route::get('/logout', [\App\Livewire\Login::class, 'logout'])->name('logout');
 });

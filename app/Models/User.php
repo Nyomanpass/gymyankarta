@@ -12,12 +12,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'email',
         'password',
+        'nomor_telepon',
         'role',
         'status',
-        'username',
-        'nomor_telepon',
+        'member_type',
+        'membership_started_date',
+        'membership_expiration_date',
     ];
 
     protected $hidden = [
@@ -25,36 +28,47 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'membership_started_date' => 'date',
+        'membership_expiration_date' => 'date',
+        'password' => 'hashed',
+    ];
+
+    // Relasi
+    public function attendances()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasMany(Attendance::class);
     }
 
-    public function isPendingEmailVerificatioon()
+    public function transactions()
     {
-        return $this->status === 'pending_email_verification';
+        return $this->hasMany(Transaction::class);
     }
 
-    public function isPendingAdminVerification()
+    // Scope untuk filter berdasarkan role
+    public function scopeAdmins($query)
     {
-        return $this->status === 'pending_admin_verification';
-    }
-    public function isActive()
-    {
-        return $this->status === 'active';
-    }
-    public function isFrozen()
-    {
-        return $this->status === 'frozen';
-    }
-    public function isInactive()
-    {
-        return $this->status === 'inactive';
+        return $query->where('role', 'admin');
     }
 
+    public function scopeMembers($query)
+    {
+        return $query->where('role', 'member');
+    }
+
+    // Scope untuk filter berdasarkan status
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
+    }
+
+    public function scopePendingVerification($query)
+    {
+        return $query->where('status', 'pending_admin_verification');
+    }
+
+    // Helper methods
     public function isAdmin()
     {
         return $this->role === 'admin';
@@ -63,5 +77,27 @@ class User extends Authenticatable
     public function isMember()
     {
         return $this->role === 'member';
+    }
+
+    public function isActive()
+    {
+        return $this->status === 'active';
+    }
+
+    public function membershipExpired()
+    {
+        return $this->membership_expiration_date && $this->membership_expiration_date->isPast();
+    }
+
+    public function canAttendToday()
+    {
+        if (!$this->isActive() || $this->membershipExpired()) {
+            return false;
+        }
+
+        // Cek apakah sudah absen hari ini
+        return !$this->attendances()
+            ->whereDate('check_in_datetime', today())
+            ->exists();
     }
 }
