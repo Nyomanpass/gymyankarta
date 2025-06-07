@@ -273,18 +273,17 @@
                         <div class="border-t border-warna-100 pt-6">
                             <h3 class="md:text-lg font-semibold mb-4 text-gray-800">Kalender Absensi Member</h3>
                             
-                            <!-- Filter Bulan dan Tahun -->
-                            <div class="flex gap-4 mb-6">
+                            <div class="flex gap-4 mb-6 px-2">
                                 <div class="flex-1">
                                     <select wire:model.live="selectedMonth" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        @foreach($this->getMonthOptions() as $value => $label)
+                                        @foreach($monthOptions as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="flex-1">
                                     <select wire:model.live="selectedYear" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                        @foreach($this->getYearOptions() as $value => $label)
+                                        @foreach($yearOptions as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
@@ -293,7 +292,7 @@
 
                             <!-- Header Hari -->
                             <div class="grid grid-cols-7 gap-1 mb-2">
-                                @foreach(['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $day)
+                                @foreach(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $day)
                                     <div class="text-center text-sm font-medium text-gray-500 py-2">
                                         {{ $day }}
                                     </div>
@@ -302,14 +301,19 @@
 
                             <!-- Kalender Grid -->
                             <div class="grid grid-cols-7 gap-1">
-                                @foreach($this->getCalendarDays() as $day)
+                                @foreach($calendarDays as $day)
                                     <div class="relative h-10 flex items-center justify-center text-sm border border-gray-200 rounded
                                         {{ !$day['isCurrentMonth'] ? 'bg-gray-50 text-gray-400' : 'bg-white' }}
                                         {{ $day['isToday'] ? 'ring-2 ring-blue-500' : '' }}
-                                        {{ $day['isAttended'] ? 'bg-green-100' : '' }}">
+                                        {{ $day['isAttended'] ? 'bg-green-100' : '' }}
+                                        {{ $day['isMembershipActive'] && !$day['isAttended'] ? 'bg-blue-50 border-blue-200' : '' }}">
                                         
                                         <!-- Nomor Tanggal -->
-                                        <span class="{{ $day['isAttended'] ? 'text-green-800 font-semibold' : 'text-gray-700' }}">
+                                        <span class="
+                                            {{ $day['isAttended'] ? 'text-green-800 font-semibold' : '' }}
+                                            {{ $day['isMembershipActive'] && !$day['isAttended'] ? 'text-blue-400' : '' }}
+                                            {{ !$day['isMembershipActive'] && $day['isCurrentMonth'] ? 'text-gray-700' : '' }}
+                                            {{ !$day['isCurrentMonth'] ? 'text-gray-400' : '' }}">
                                             {{ $day['day'] }}
                                         </span>
                                         
@@ -326,7 +330,7 @@
                             </div>
 
                             <!-- Keterangan -->
-                            <div class="flex items-center gap-4 mt-4 text-sm">
+                            <div class="flex flex-wrap items-center gap-4 mt-4 text-sm">
                                 <div class="flex items-center gap-2">
                                     <div class="w-4 h-4 bg-green-100 border border-green-200 rounded flex items-center justify-center">
                                         <i class="fas fa-check text-green-600 text-xs"></i>
@@ -334,8 +338,16 @@
                                     <span class="text-gray-600">Hadir</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-4 h-4 bg-white border border-gray-200 rounded"></div>
-                                    <span class="text-gray-600">Tidak Hadir</span>
+                                    <div class="w-4 h-4 bg-blue-50 border border-blue-200 rounded flex items-center justify-center text-blue-400 text-xs font-semibold">
+                                        1
+                                    </div>
+                                    <span class="text-gray-600">Membership Aktif</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-4 h-4 bg-white border border-gray-200 rounded flex items-center justify-center text-gray-700 text-xs">
+                                        1
+                                    </div>
+                                    <span class="text-gray-600">Membership Tidak Aktif</span>
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <div class="w-4 h-4 bg-white border-2 border-blue-500 rounded"></div>
@@ -344,28 +356,24 @@
                             </div>
 
                             <!-- Statistik Absensi -->
-                            @php
-                                $totalDaysInMonth = Carbon\Carbon::createFromDate($selectedYear, $selectedMonth, 1)->daysInMonth;
-                                $attendedDays = count(array_filter($this->getCalendarDays(), function($day) {
-                                    return $day['isCurrentMonth'] && $day['isAttended'];
-                                }));
-                                $attendancePercentage = $totalDaysInMonth > 0 ? round(($attendedDays / $totalDaysInMonth) * 100, 1) : 0;
-                            @endphp
-                            
                             <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                                <h4 class="font-semibold text-gray-800 mb-2">Statistik Bulan {{ $this->getMonthOptions()[$selectedMonth] }} {{ $selectedYear }}</h4>
-                                <div class="grid grid-cols-3 gap-4 text-center">
+                                <h4 class="font-semibold text-gray-800 mb-2">Statistik Bulan {{ $attendanceStats['monthName'] }} {{ $attendanceStats['year'] }}</h4>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                                     <div>
-                                        <div class="text-2xl font-bold text-green-600">{{ $attendedDays }}</div>
+                                        <div class="text-2xl font-bold text-green-600">{{ $attendanceStats['attendedDays'] }}</div>
                                         <div class="text-sm text-gray-600">Hari Hadir</div>
                                     </div>
                                     <div>
-                                        <div class="text-2xl font-bold text-gray-600">{{ $totalDaysInMonth - $attendedDays }}</div>
-                                        <div class="text-sm text-gray-600">Hari Tidak Hadir</div>
+                                        <div class="text-2xl font-bold text-blue-600">{{ $attendanceStats['membershipActiveDays'] }}</div>
+                                        <div class="text-sm text-gray-600">Hari Membership</div>
                                     </div>
                                     <div>
-                                        <div class="text-2xl font-bold text-blue-600">{{ $attendancePercentage }}%</div>
-                                        <div class="text-sm text-gray-600">Persentase Hadir</div>
+                                        <div class="text-2xl font-bold text-gray-600">{{ $attendanceStats['notAttendedDays'] }}</div>
+                                        <div class="text-sm text-gray-600">Tidak Hadir</div>
+                                    </div>
+                                    <div>
+                                        <div class="text-2xl font-bold text-purple-600">{{ $attendanceStats['attendancePercentage'] }}%</div>
+                                        <div class="text-sm text-gray-600">Tingkat Kehadiran</div>
                                     </div>
                                 </div>
                             </div>

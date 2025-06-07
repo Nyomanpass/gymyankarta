@@ -36,7 +36,11 @@ class Login extends Component
         if ($user && Hash::check($this->password, $user->password)) {
             if ($user->status === 'active' || $user->status === 'frozen') {
                 Auth::login($user);
-                return redirect()->intended('/dashboard');
+                if ($user->role === 'admin') {
+                    return redirect()->route('dashboard');
+                } else {
+                    return redirect()->route('dashboard.member');
+                }
             } else {
                 if ($user->status === 'pending_admin_verification') {
                     session()->flash('error', 'Lakukan pembayaran terlebih dahulu dan tunggu admin melakukan verifikasi.');

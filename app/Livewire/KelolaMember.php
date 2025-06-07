@@ -40,6 +40,12 @@ class KelolaMember extends Component
     public $selectedMonth;
     public $selectedYear;
 
+    //properties untuk absensi
+    public $monthOptions = [];
+    public $yearOptions = [];
+    public $calendarDays = [];
+    public $attendanceStats = [];
+
     //mode
     public $verifikasiMemberMode = false;
     public $TambahMemberMode = false;
@@ -47,6 +53,14 @@ class KelolaMember extends Component
     public $hapusMemberMode = false;
 
     protected $paginationTheme = 'tailwind';
+
+
+    public function mount()
+    {
+        $this->selectedMonth = now()->month;
+        $this->selectedYear = now()->year;
+        $this->initializeOptions();
+    }
 
 
     public function render()
@@ -203,17 +217,46 @@ class KelolaMember extends Component
         $this->closeInputModal();
     }
 
+
+    public function initializeOptions()
+    {
+        $this->monthOptions = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        $currentYear = now()->year;
+        $this->yearOptions = [];
+        for ($i = $currentYear - 2; $i <= $currentYear + 1; $i++) {
+            $this->yearOptions[$i] = $i;
+        }
+    }
+
     public function openDetailMemberModal($selectedMemberId)
     {
         $this->selectedMemberId = $selectedMemberId;
-        $this->memberDetail = User::find($this->selectedMemberId);
+        $this->memberDetail = User::find($selectedMemberId);
         $this->detailMemberMode = true;
         $this->isInputModalOpen = true;
 
+        // Set default bulan dan tahun ke bulan ini
         $this->selectedMonth = now()->month;
         $this->selectedYear = now()->year;
 
+        // Load attendance data dan calendar
         $this->loadMemberAttendances();
+        $this->generateCalendarDays();
+        $this->calculateAttendanceStats();
     }
 
     public function openHapusMemberModal()
@@ -248,11 +291,15 @@ class KelolaMember extends Component
     public function updatedSelectedMonth()
     {
         $this->loadMemberAttendances();
+        $this->generateCalendarDays();
+        $this->calculateAttendanceStats();
     }
 
     public function updatedSelectedYear()
     {
         $this->loadMemberAttendances();
+        $this->generateCalendarDays();
+        $this->calculateAttendanceStats();
     }
 
     public function loadMemberAttendances()
@@ -271,31 +318,67 @@ class KelolaMember extends Component
             ->toArray();
     }
 
-    public function getCalendarDays()
+    public function generateCalendarDays()
     {
         $date = Carbon::createFromDate($this->selectedYear, $this->selectedMonth, 1);
         $startOfMonth = $date->copy()->startOfMonth();
         $endOfMonth = $date->copy()->endOfMonth();
         $startOfCalendar = $startOfMonth->copy()->startOfWeek();
 
-        $days = [];
+        // Get membership dates
+        $membershipStart = $this->memberDetail ? Carbon::parse($this->memberDetail['membership_started_date']) : null;
+        $membershipEnd = $this->memberDetail ? Carbon::parse($this->memberDetail['membership_expiration_date']) : null;
+
+        $this->calendarDays = [];
         $currentDate = $startOfCalendar->copy();
 
+        // Generate 42 days (6 weeks * 7 days) untuk kalender yang konsisten
         for ($i = 0; $i < 42; $i++) {
             $isCurrentMonth = $currentDate->month == $this->selectedMonth;
             $isAttended = in_array($currentDate->format('Y-m-d'), $this->memberAttendances);
 
-            $days[] = [
+            // Check if date is within membership period
+            $isMembershipActive = false;
+            if ($membershipStart && $membershipEnd) {
+                $isMembershipActive = $currentDate->between($membershipStart, $membershipEnd);
+            }
+
+            $this->calendarDays[] = [
                 'date' => $currentDate->copy(),
                 'day' => $currentDate->day,
                 'isCurrentMonth' => $isCurrentMonth,
                 'isAttended' => $isAttended && $isCurrentMonth,
                 'isToday' => $currentDate->isToday() && $isCurrentMonth,
+                'isMembershipActive' => $isMembershipActive && $isCurrentMonth,
             ];
+
             $currentDate->addDay();
         }
+    }
 
-        return $days;
+    private function calculateAttendanceStats()
+    {
+        $totalDaysInMonth = Carbon::createFromDate($this->selectedYear, $this->selectedMonth, 1)->daysInMonth;
+        $attendedDays = count(array_filter($this->calendarDays, function ($day) {
+            return $day['isCurrentMonth'] && $day['isAttended'];
+        }));
+
+        // Hitung hari membership aktif dalam bulan ini
+        $membershipActiveDays = count(array_filter($this->calendarDays, function ($day) {
+            return $day['isCurrentMonth'] && $day['isMembershipActive'];
+        }));
+
+        $attendancePercentage = $membershipActiveDays > 0 ? round(($attendedDays / $membershipActiveDays) * 100, 1) : 0;
+
+        $this->attendanceStats = [
+            'totalDaysInMonth' => $totalDaysInMonth,
+            'attendedDays' => $attendedDays,
+            'notAttendedDays' => $membershipActiveDays - $attendedDays,
+            'membershipActiveDays' => $membershipActiveDays,
+            'attendancePercentage' => $attendancePercentage,
+            'monthName' => $this->monthOptions[$this->selectedMonth],
+            'year' => $this->selectedYear
+        ];
     }
 
     public function getMonthOptions()
@@ -324,5 +407,33 @@ class KelolaMember extends Component
             $years[$i] = $i;
         }
         return $years;
+    }
+
+
+    // testing only. HAPUS METHOD INI KALO UDAH DI PRODUCTION
+    public function testAbsen()
+    {
+        $member = User::find($this->selectedMemberId);
+        if ($member) {
+            $attendance = new \App\Models\Attendance();
+            $attendance->user_id = $member->id;
+            $attendance->check_in_datetime = now();
+            $attendance->save();
+
+            session()->flash('message', [
+                'type' => 'success',
+                'title' => 'Absensi Berhasil',
+                'description' => 'Member berhasil absen.',
+            ]);
+        } else {
+            session()->flash('message', [
+                'type' => 'error',
+                'title' => 'Absensi Gagal',
+                'description' => 'Member tidak ditemukan.',
+            ]);
+        }
+        $this->loadMemberAttendances();
+        $this->generateCalendarDays();
+        $this->calculateAttendanceStats();
     }
 }
