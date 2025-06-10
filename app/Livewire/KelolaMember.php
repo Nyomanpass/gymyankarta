@@ -6,10 +6,9 @@ use Livewire\Component;
 use Livewire\Attributes\Layout;
 use Livewire\WithPagination;
 use App\Models\User;
-use function Pest\Laravel\get;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class KelolaMember extends Component
 {
@@ -20,19 +19,23 @@ class KelolaMember extends Component
     //modals
     public $isInputModalOpen = false;
     public $isNotificationModalOpen = false;
+    public $isEditModalOpen = false;
 
     //properties
     public $selectedMemberId = null;
-    public $searchUnverifiedMember = '';
     public $searchVerifiedMember = '';
-    public $member_type = '';
-    public $durationMembership = '';
+
     //properties untuk tambah member
     public $name = '';
     public $nomor_telepon = '';
     public $username = '';
     public $email = '';
     public $password = '';
+
+    //properties untuk filter
+    public $filterMemberType = '';
+    public $filterStatus = '';
+    public $showFilters = false;
 
     // detail member
     public $memberDetail = [];
@@ -47,13 +50,23 @@ class KelolaMember extends Component
     public $attendanceStats = [];
 
     //mode
-    public $verifikasiMemberMode = false;
     public $TambahMemberMode = false;
     public $detailMemberMode = false;
     public $hapusMemberMode = false;
+    public $editMemberMode = false;
+
+    public $verifikasiMemberMode = false;
+
+    //properties untuk form edit
+    public $editName = '';
+    public $editEmail = '';
+    public $editNomorTelepon = '';
+    public $editUsername = '';
+    public $editMemberType = '';
+    public $selectedStatus = '';
+    public $editPassword = '';
 
     protected $paginationTheme = 'tailwind';
-
 
     public function mount()
     {
@@ -62,30 +75,13 @@ class KelolaMember extends Component
         $this->initializeOptions();
     }
 
-
     public function render()
     {
         if ($message = session('message')) {
             $this->isNotificationModalOpen = true;
         }
 
-        // Query untuk unverified members (tanpa pagination)
-        $members = User::members()
-            ->when($this->searchUnverifiedMember, function ($query) {
-                $query->where(function ($subQuery) {
-                    $subQuery->where('name', 'like', '%' . $this->searchUnverifiedMember . '%')
-                        ->orWhere('username', 'like', '%' . $this->searchUnverifiedMember . '%')
-                        ->orWhere('email', 'like', '%' . $this->searchUnverifiedMember . '%');
-                });
-            })
-            ->where(function ($query) {
-                $query->where('status', 'pending_admin_verification')
-                    ->orWhere('status', 'inactive');
-            })
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        // Query untuk verified members (dengan pagination)
+        // Query untuk verified members dengan filter
         $verifiedMembers = User::members()
             ->when($this->searchVerifiedMember, function ($query) {
                 $query->where(function ($subQuery) {
@@ -94,42 +90,91 @@ class KelolaMember extends Component
                         ->orWhere('email', 'like', '%' . $this->searchVerifiedMember . '%');
                 });
             })
-            ->where(function ($query) {
-                $query->where('status', 'active')
-                    ->orWhere('status', 'frozen');
+            ->when($this->filterMemberType, function ($query) {
+                $query->where('member_type', $this->filterMemberType);
+            })
+            ->when($this->filterStatus, function ($query) {
+                $query->where('status', $this->filterStatus);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'verifiedPage'); // 10 data per halaman
+            ->paginate(10, ['*'], 'verifiedPage');
 
-        return view('livewire.kelola-member', compact('members', 'verifiedMembers'));
+        return view('livewire.kelola-member', compact('verifiedMembers'));
     }
 
-    public function updatedSerachVerifiedMember()
+    // Update methods for filter
+    public function updatedSearchVerifiedMember()
     {
-        $this->resetPage('verified_members_page');
+        $this->resetPage('verifiedPage');
+    }
+
+    public function updatedFilterMemberType()
+    {
+        $this->resetPage('verifiedPage');
+    }
+
+    public function updatedFilterStatus()
+    {
+        $this->resetPage('verifiedPage');
+    }
+
+    public function toggleFilters()
+    {
+        $this->showFilters = !$this->showFilters;
+    }
+
+    public function resetFilters()
+    {
+        $this->filterMemberType = '';
+        $this->filterStatus = '';
+        $this->searchVerifiedMember = '';
+        $this->showFilters = false;
+        $this->resetPage('verifiedPage');
+    }
+
+    // Method untuk mendapatkan count berdasarkan filter
+    public function getFilterCounts()
+    {
+        $baseQuery = User::members();
+
+        // Apply search if exists
+        if ($this->searchVerifiedMember) {
+            $baseQuery->where(function ($q) {
+                $q->where('name', 'like', '%' . $this->searchVerifiedMember . '%')
+                    ->orWhere('email', 'like', '%' . $this->searchVerifiedMember . '%')
+                    ->orWhere('username', 'like', '%' . $this->searchVerifiedMember . '%');
+            });
+        }
+
+        return [
+            'total' => $baseQuery->count(),
+            'local' => (clone $baseQuery)->where('member_type', 'local')->count(),
+            'foreign' => (clone $baseQuery)->where('member_type', 'foreign')->count(),
+            'active' => (clone $baseQuery)->where('status', 'active')->count(),
+            'frozen' => (clone $baseQuery)->where('status', 'frozen')->count(),
+            'inactive' => (clone $baseQuery)->where('status', 'inactive')->count(),
+            'pending_email_verification' => (clone $baseQuery)->where('status', 'pending_email_verification')->count(),
+            'pending_admin_verification' => (clone $baseQuery)->where('status', 'pending_admin_verification')->count(),
+        ];
     }
 
     public function resetInput()
     {
         $this->selectedMemberId = null;
-        $this->searchUnverifiedMember = '';
         $this->searchVerifiedMember = '';
-        $this->member_type = '';
-        $this->durationMembership = '';
-        $this->verifikasiMemberMode = false;
         $this->TambahMemberMode = false;
-        $this->DetailMemberMode = false;
-        $this->HapusMemberMode = false;
+        $this->detailMemberMode = false;
+        $this->hapusMemberMode = false;
+        $this->editMemberMode = false;
         $this->resetPage('verifiedPage');
-    }
 
-    public function openVerifikasiModal($selectedMemberId)
-    {
-        $this->selectedMemberId = $selectedMemberId;
-        $this->verifikasiMemberMode = true;
-        $this->isInputModalOpen = true;
+        // Reset form input untuk tambah member
+        $this->name = '';
+        $this->nomor_telepon = '';
+        $this->username = '';
+        $this->email = '';
+        $this->password = '';
     }
-
 
     public function closeInputModal()
     {
@@ -137,46 +182,154 @@ class KelolaMember extends Component
         $this->resetInput();
     }
 
+
+    public function closeEditModal()
+    {
+        $this->isEditModalOpen = false;
+        $this->isInputModalOpen = true;
+        $this->detailMemberMode = true;
+        $this->resetEditForm();
+    }
+
     public function closeNotificationModal()
     {
         $this->isNotificationModalOpen = false;
     }
 
-    public function verifyMember()
+    public function openEditMemberModal()
     {
-        $member = User::find($this->selectedMemberId);
-        if ($member && $this->member_type == 'local') {
-            $member->status = 'active';
-            $member->member_type = 'local';
-            $member->membership_started_date = now();
-            $member->membership_expiration_date = now()->addMonth();
-            $member->save();
-            session()->flash('message', [
-                'type' => 'success',
-                'title' => 'Verifikasi Berhasil',
-                'description' => 'Member berhasil diverifikasi.',
-            ]);
-        } elseif ($member && $this->member_type == 'foreign') {
-            $member->status = 'active';
-            $member->member_type = 'foreign';
-            $member->membership_started_date = now();
-            if ($this->durationMembership == 'one_month') {
-                $member->membership_expiration_date = now()->addMonth();
-            } elseif ($this->durationMembership == 'three_weeks') {
-                $member->membership_expiration_date = now()->addWeeks(3);
-            } elseif ($this->durationMembership == 'two_weeks') {
-                $member->membership_expiration_date = now()->addWeeks(2);
-            } elseif ($this->durationMembership == 'one_week') {
-                $member->membership_expiration_date = now()->addWeek();
+        $this->editMemberMode = true;
+        $this->detailMemberMode = false;
+
+        $this->editName = $this->memberDetail['name'];
+        $this->editEmail = $this->memberDetail['email'];
+        $this->editNomorTelepon = $this->memberDetail['nomor_telepon'];
+        $this->editUsername = $this->memberDetail['username'];
+        $this->editMemberType = $this->memberDetail['member_type'];
+        $this->selectedStatus = $this->memberDetail['status'];
+        $this->editPassword = '';
+
+        $this->isEditModalOpen = true;
+    }
+
+
+    public function resetEditForm()
+    {
+        $this->editName = '';
+        $this->editEmail = '';
+        $this->editNomorTelepon = '';
+        $this->editUsername = '';
+        $this->editMemberType = '';
+        $this->selectedStatus = '';
+        $this->editPassword = '';
+    }
+
+    public function updateMember()
+    {
+        $this->validate([
+            'editName' => 'required|string|max:255',
+            'editEmail' => 'required|email|unique:users,email,' . $this->memberDetail['id'],
+            'editNomorTelepon' => 'required|string|max:20',
+            'editUsername' => 'required|string|max:255|unique:users,username,' . $this->memberDetail['id'],
+            'editMemberType' => 'required|in:local,foreign',
+            'selectedStatus' => 'required|in:active,frozen,inactive',
+        ], [
+            'editName.required' => 'Nama tidak boleh kosong.',
+            'editEmail.required' => 'Email tidak boleh kosong.',
+            'editEmail.email' => 'Format email tidak valid.',
+            'editEmail.unique' => 'Email sudah digunakan.',
+            'editNomorTelepon.required' => 'Nomor telepon tidak boleh kosong.',
+            'editUsername.required' => 'Username tidak boleh kosong.',
+            'editUsername.unique' => 'Username sudah digunakan.',
+            'editMemberType.required' => 'Jenis member tidak boleh kosong.',
+            'selectedStatus.required' => 'Status tidak boleh kosong.',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $updateData = [
+                'name' => $this->editName,
+                'email' => $this->editEmail,
+                'nomor_telepon' => $this->editNomorTelepon,
+                'username' => $this->editUsername,
+                'member_type' => $this->editMemberType,
+                'status' => $this->selectedStatus,
+            ];
+
+            if (!empty($this->editPassword)) {
+                $this->validate([
+                    'editPassword' => 'required|string|min:8',
+                ], [
+                    'editPassword.required' => 'Password tidak boleh kosong.',
+                    'editPassword.min' => 'Password harus minimal 8 karakter.',
+                ]);
+                $updateData['password'] = Hash::make($this->editPassword);
             }
-            $member->save();
+
+            if ($this->selectedStatus === 'inactive') {
+                $updateData['membership_started_date'] = null;
+                $updateData['membership_expiration_date'] = null;
+            } elseif ($this->selectedStatus === 'active') {
+                $updateData['membership_started_date'] = now();
+                $updateData['membership_expiration_date'] = now()->addMonth();
+            }
+
+            User::where('id', $this->memberDetail['id'])->update($updateData);
+
+            // Refresh memberDetail
+            $this->memberDetail = User::find($this->memberDetail['id'])->toArray();
+
+            DB::commit();
             session()->flash('message', [
                 'type' => 'success',
-                'title' => 'Verifikasi Berhasil',
-                'description' => 'Member berhasil diverifikasi.',
+                'title' => 'Update Berhasil',
+                'description' => 'Data member berhasil diperbarui.',
+            ]);
+
+            $this->closeEditModal();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            session()->flash('message', [
+                'type' => 'error',
+                'title' => 'Update Gagal',
+                'description' => 'Terjadi kesalahan saat memperbarui data member: ' . $e->getMessage(),
             ]);
         }
-        $this->closeInputModal();
+    }
+
+    public function changeStatus($status)
+    {
+        try {
+            $updateData = [
+                'status' => $status,
+            ];
+
+            if ($status === 'inactive') {
+                $updateData['membership_started_date'] = null;
+                $updateData['membership_expiration_date'] = null;
+            } elseif ($status === 'active') {
+                $updateData['membership_started_date'] = now();
+                $updateData['membership_expiration_date'] = now()->addMonth();
+            }
+
+            User::where('id', $this->selectedMemberId)->update($updateData);
+
+            // Refresh memberDetail
+            $this->memberDetail = User::find($this->selectedMemberId)->toArray();
+
+            session()->flash('message', [
+                'type' => 'success',
+                'title' => 'Status Berhasil Diubah',
+                'description' => 'Status member berhasil diubah menjadi ' . $status . '.',
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('message', [
+                'type' => 'error',
+                'title' => 'Gagal Mengubah Status',
+                'description' => 'Terjadi kesalahan saat mengubah status member: ' . $e->getMessage(),
+            ]);
+        }
     }
 
     public function openTambahMemberModal()
@@ -203,10 +356,11 @@ class KelolaMember extends Component
             'email' => $this->email,
             'password' => Hash::make($this->password),
             'role' => 'member',
-            'status' => 'pending_admin_verification',
+            'status' => 'active', // Langsung aktif tanpa verifikasi
+            'member_type' => 'local', // Default local
+            'membership_started_date' => now(),
+            'membership_expiration_date' => now()->addMonth(),
         ]);
-        $member->save();
-
 
         session()->flash('message', [
             'type' => 'success',
@@ -216,7 +370,6 @@ class KelolaMember extends Component
 
         $this->closeInputModal();
     }
-
 
     public function initializeOptions()
     {
@@ -245,15 +398,14 @@ class KelolaMember extends Component
     public function openDetailMemberModal($selectedMemberId)
     {
         $this->selectedMemberId = $selectedMemberId;
-        $this->memberDetail = User::find($selectedMemberId);
+        $this->memberDetail = User::find($selectedMemberId)->toArray();
         $this->detailMemberMode = true;
+        $this->editMemberMode = false;
         $this->isInputModalOpen = true;
 
-        // Set default bulan dan tahun ke bulan ini
         $this->selectedMonth = now()->month;
         $this->selectedYear = now()->year;
 
-        // Load attendance data dan calendar
         $this->loadMemberAttendances();
         $this->generateCalendarDays();
         $this->calculateAttendanceStats();
@@ -285,9 +437,7 @@ class KelolaMember extends Component
         $this->hapusMemberMode = false;
     }
 
-
-    // method absensi
-
+    // Method absensi tetap sama...
     public function updatedSelectedMonth()
     {
         $this->loadMemberAttendances();
@@ -325,19 +475,16 @@ class KelolaMember extends Component
         $endOfMonth = $date->copy()->endOfMonth();
         $startOfCalendar = $startOfMonth->copy()->startOfWeek();
 
-        // Get membership dates
         $membershipStart = $this->memberDetail ? Carbon::parse($this->memberDetail['membership_started_date']) : null;
         $membershipEnd = $this->memberDetail ? Carbon::parse($this->memberDetail['membership_expiration_date']) : null;
 
         $this->calendarDays = [];
         $currentDate = $startOfCalendar->copy();
 
-        // Generate 42 days (6 weeks * 7 days) untuk kalender yang konsisten
         for ($i = 0; $i < 42; $i++) {
             $isCurrentMonth = $currentDate->month == $this->selectedMonth;
             $isAttended = in_array($currentDate->format('Y-m-d'), $this->memberAttendances);
 
-            // Check if date is within membership period
             $isMembershipActive = false;
             if ($membershipStart && $membershipEnd) {
                 $isMembershipActive = $currentDate->between($membershipStart, $membershipEnd);
@@ -363,7 +510,6 @@ class KelolaMember extends Component
             return $day['isCurrentMonth'] && $day['isAttended'];
         }));
 
-        // Hitung hari membership aktif dalam bulan ini
         $membershipActiveDays = count(array_filter($this->calendarDays, function ($day) {
             return $day['isCurrentMonth'] && $day['isMembershipActive'];
         }));
@@ -381,36 +527,7 @@ class KelolaMember extends Component
         ];
     }
 
-    public function getMonthOptions()
-    {
-        return collect([
-            1 => 'Januari',
-            2 => 'Februari',
-            3 => 'Maret',
-            4 => 'April',
-            5 => 'Mei',
-            6 => 'Juni',
-            7 => 'Juli',
-            8 => 'Agustus',
-            9 => 'September',
-            10 => 'Oktober',
-            11 => 'November',
-            12 => 'Desember',
-        ]);
-    }
-
-    public function getYearOptions()
-    {
-        $currentYear = now()->year;
-        $years = [];
-        for ($i = $currentYear - 5; $i <= $currentYear + 5; $i++) {
-            $years[$i] = $i;
-        }
-        return $years;
-    }
-
-
-    // testing only. HAPUS METHOD INI KALO UDAH DI PRODUCTION
+    // Testing method - hapus di production
     public function testAbsen()
     {
         $member = User::find($this->selectedMemberId);
@@ -424,12 +541,6 @@ class KelolaMember extends Component
                 'type' => 'success',
                 'title' => 'Absensi Berhasil',
                 'description' => 'Member berhasil absen.',
-            ]);
-        } else {
-            session()->flash('message', [
-                'type' => 'error',
-                'title' => 'Absensi Gagal',
-                'description' => 'Member tidak ditemukan.',
             ]);
         }
         $this->loadMemberAttendances();

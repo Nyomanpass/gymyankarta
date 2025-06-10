@@ -1,172 +1,276 @@
 <div>
-    <div class="bg-white p-6 rounded-lg w-full">
-        <h2 class="text-xl font-semibold mb-8 md:mb-10">Verifikasi Member</h2>
-        <div class="mb-5">
-            <x-g-input 
-                wire:model.live="searchUnverifiedMember"
-                class="w-full mb-5 md:mb-7"
-                label="Cari Member"
-            />
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-warna-200">
-                <thead class="w-full text-xs ">
-                    <tr>
-                    <th class="px-6 py-3 border-b-2 border-gray-200 text-left leading-4 font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-200 text-left leading-4 font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-200 text-left leading-4 font-medium text-gray-500 uppercase tracking-wider">No Telepon</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-200 text-left leading-4 font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th class="px-6 py-3 border-b-2 border-gray-200"></th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-warna-100">
-                    @if($members->isEmpty())
-                    <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                             @if($searchUnverifiedMember)
-                                    Tidak ada member yang cocok dengan pencarian "{{ $searchUnverifiedMember }}"
-                                @else
-                                    Tidak ada member yang perlu diverifikasi.
-                                @endif
-                        </td>
-                    </tr>
-                    @endif
-                    @foreach($members as $member)
-                    <tr class=" ">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $member['name'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $member['email'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $member['nomor_telepon'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ str_replace('_', ' ', $member['status']) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <button wire:click="openVerifikasiModal({{ $member['id'] }})" class="px-6 py-2 md:py-3 bg-warna-700 rounded-xl text-sm text-white active:scale-95 hover:bg-warna-700/80 transition-all">Verifikasi</button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
 
-    <div class="bg-white p-6 py-10 rounded-lg w-full mt-10">
+    <div class="bg-white p-6 py-10 rounded-lg text-sm">
+        <!-- Header Section -->
         <div class="flex items-center justify-between mb-8 md:mb-10">
-            <h2 class="text-xl font-semibold">Member Terverifikasi</h2>
+            <h2 class="text-2xl font-bold text-gray-900">Kelola Member</h2>
             <button 
                 wire:click="openTambahMemberModal" 
-                class="px-4 py-2 bg-warna-700 text-white rounded-lg hover:bg-warna-700/80 active:scale-95 transition-all"
+                class="px-4 py-2 bg-warna-700 text-white rounded-lg hover:bg-warna-700/80 active:scale-95 transition-all flex items-center gap-2"
                 data-tooltip-target="tooltip-add-member"
                 data-tooltip-placement="top"
             >
                 <i class="fa-solid fa-plus"></i>
+                <span class="hidden sm:inline">Tambah Member</span>
             </button>
             <div id="tooltip-add-member" role="tooltip" class="absolute z-10 invisible inline-block px-3 py-2 text-xs font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
                 Tambah Member Baru
                 <div class="tooltip-arrow" data-popper-arrow></div>
             </div>
         </div>
-        <div class="mb-5">
-            <x-g-input 
-                wire:model.live="searchVerifiedMember"
-                class="w-full mb-5 md:mb-7"
-                label="Cari Member"
-            />
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-warna-200">
-                {{-- Table header --}}
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expired</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
-                    </tr>
-                </thead>
-                {{-- Table body --}}
-                <tbody class="bg-white divide-y divide-warna-100">
-                    @forelse($verifiedMembers as $member)
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                {{ $member->name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $member->email }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    {{ $member->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ ucfirst($member->status) }}
+
+        <!-- Search and Filter Section -->
+        <div class="mb-6 space-y-4">
+            <!-- Search Bar dan Filter Toggle -->
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-1">
+                    <x-g-input 
+                        wire:model.live="searchVerifiedMember"
+                        class="w-full"
+                        label="Cari Member"
+                        placeholder="Cari berdasarkan nama, email, atau username..."
+                    />
+                </div>
+                <div class="flex items-end gap-2">
+                    <!-- Filter Dropdown -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" 
+                                class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 flex items-center gap-2
+                                {{ $filterMemberType || $filterStatus ? 'bg-blue-100 text-blue-700 border border-blue-200' : '' }}">
+                            <i class="fas fa-filter"></i>
+                            <span class="hidden sm:inline">Filter</span>
+                            @if($filterMemberType || $filterStatus)
+                                <span class="bg-blue-500 text-white text-xs rounded-full px-2 py-0.5 ml-1">
+                                    {{ ($filterMemberType ? 1 : 0) + ($filterStatus ? 1 : 0) }}
                                 </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $member->membership_expiration_date ? $member->membership_expiration_date->format('d/m/Y') : '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <button wire:click="openDetailMemberModal({{ $member->id }})" class="text-indigo-600 hover:text-indigo-900">
-                                    Detail
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
-                                @if($searchVerifiedMember)
-                                    Tidak ada member yang cocok dengan pencarian "{{ $searchVerifiedMember }}"
-                                @else
-                                    Tidak ada member aktif yang terdaftar.
+                            @endif
+                            <i class="fas fa-chevron-down text-xs transition-transform duration-200" 
+                               :class="{ 'rotate-180': open }"></i>
+                        </button>
+                        
+                        <!-- Dropdown Panel -->
+                        <div x-show="open" 
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2 scale-95"
+                             x-transition:enter-end="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 transform translate-y-0 scale-100"
+                             x-transition:leave-end="opacity-0 transform -translate-y-2 scale-95"
+                             class="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                            
+                            <div class="p-4">
+                                <h3 class="text-sm font-semibold text-gray-800 mb-4">Filter Member</h3>
+                                
+                                <div class="space-y-4">
+                                    <!-- Filter Jenis Member -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Jenis Member</label>
+                                        <select wire:model.live="filterMemberType" 
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                            <option value="">Semua Jenis</option>
+                                            <option value="local">Local ({{ $this->getFilterCounts()['local'] }})</option>
+                                            <option value="foreign">Foreign ({{ $this->getFilterCounts()['foreign'] }})</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Filter Status -->
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Status Member</label>
+                                        <select wire:model.live="filterStatus" 
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                                            <option value="">Semua Status</option>
+                                            <option value="active">Active ({{ $this->getFilterCounts()['active'] }})</option>
+                                            <option value="frozen">Frozen ({{ $this->getFilterCounts()['frozen'] }})</option>
+                                            <option value="inactive">Inactive ({{ $this->getFilterCounts()['inactive'] }})</option>
+                                            <option value="pending_email_verification">Pending Email ({{ $this->getFilterCounts()['pending_email_verification'] }})</option>
+                                            <option value="pending_admin_verification">Pending Admin ({{ $this->getFilterCounts()['pending_admin_verification'] }})</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Filter Summary -->
+                                <div class="mt-4 pt-4 border-t border-gray-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-sm text-gray-600">
+                                            Total: <span class="font-semibold text-blue-600">{{ $this->getFilterCounts()['total'] }}</span> member
+                                        </div>
+                                        @if($filterMemberType || $filterStatus)
+                                            <button wire:click="resetFilters" 
+                                                    @click="open = false"
+                                                    class="text-xs text-red-600 hover:text-red-700 font-medium">
+                                                Reset Filter
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <!-- Active Filters Display -->
+                                @if($filterMemberType || $filterStatus)
+                                    <div class="mt-3 pt-3 border-t border-gray-100">
+                                        <div class="flex flex-wrap items-center gap-2">
+                                            <span class="text-xs text-gray-500">Filter aktif:</span>
+                                            
+                                            @if($filterMemberType)
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                    <i class="fas {{ $filterMemberType === 'local' ? 'fa-home' : 'fa-globe' }} mr-1"></i>
+                                                    {{ ucfirst($filterMemberType) }}
+                                                    <button wire:click="$set('filterMemberType', '')" class="ml-1 hover:text-blue-600">
+                                                        <i class="fas fa-times text-xs"></i>
+                                                    </button>
+                                                </span>
+                                            @endif
+
+                                            @if($filterStatus)
+                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium 
+                                                    {{ $filterStatus === 'active' ? 'bg-green-100 text-green-800' : 
+                                                       ($filterStatus === 'frozen' ? 'bg-yellow-100 text-yellow-800' : 
+                                                       ($filterStatus === 'inactive' ? 'bg-red-100 text-red-800' :
+                                                       ($filterStatus === 'pending_email_verification' ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800'))) }}">
+                                                    <div class="w-2 h-2 rounded-full mr-1 
+                                                        {{ $filterStatus === 'active' ? 'bg-green-500' : 
+                                                           ($filterStatus === 'frozen' ? 'bg-yellow-500' : 
+                                                           ($filterStatus === 'inactive' ? 'bg-red-500' :
+                                                           ($filterStatus === 'pending_email_verification' ? 'bg-orange-500' : 'bg-purple-500'))) }}"></div>
+                                                    {{ str_replace('_', ' ', ucfirst($filterStatus)) }}
+                                                    <button wire:click="$set('filterStatus', '')" class="ml-1 hover:opacity-70">
+                                                        <i class="fas fa-times text-xs"></i>
+                                                    </button>
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </div>
                                 @endif
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Button (standalone) -->
+                    @if($filterMemberType || $filterStatus || $searchVerifiedMember)
+                        <button wire:click="resetFilters" 
+                                class="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-all duration-200 flex items-center gap-2">
+                            <i class="fas fa-times"></i>
+                            <span class="hidden sm:inline">Reset</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
         </div>
-       <div class="mt-6">
+
+        <!-- Table Section -->
+        <div class='overflow-hidden'>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-warna-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expired</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipe Member</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
+                        </tr>
+                    </thead>
+                    
+                    <tbody class="bg-white divide-y divide-warna-100">
+                        @forelse($verifiedMembers as $member)
+                            <tr class="hover:bg-gray-50 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    {{ $member->name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $member->email }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                        {{ $member->status === 'active' ? 'bg-green-100 text-green-800' : 
+                                        ($member->status === 'frozen' ? 'bg-yellow-100 text-yellow-800' : 
+                                        ($member->status === 'inactive' ? 'bg-red-100 text-red-800' :
+                                        ($member->status === 'pending_email_verification' ? 'bg-orange-100 text-orange-800' : 'bg-purple-100 text-purple-800'))) }}">
+                                        {{ str_replace('_', ' ', ucfirst($member->status)) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    @if($member->membership_expiration_date)
+                                        <span class="
+                                            {{ $member->membership_expiration_date->isPast() ? 'text-red-600 font-medium' : 'text-gray-900' }}">
+                                            {{ $member->membership_expiration_date->format('d/m/Y') }}
+                                        </span>
+                                    @else
+                                        <span class="text-gray-400">-</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs
+                                        {{ $member->member_type === 'local' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                        <i class="fas {{ $member->member_type === 'local' ? 'fa-home' : 'fa-globe' }} mr-1"></i>
+                                        {{ ucfirst($member->member_type) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <button wire:click="openDetailMemberModal({{ $member->id }})" 
+                                            class="text-indigo-600 hover:text-indigo-900 transition-colors duration-150">
+                                        Detail
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 whitespace-nowrap text-sm text-gray-500 text-center">
+                                    <div class="flex flex-col items-center">
+                                        <i class="fas fa-users text-gray-300 text-4xl mb-4"></i>
+                                        @if($searchVerifiedMember || $filterMemberType || $filterStatus)
+                                            <p class="font-medium mb-2">Tidak ada member yang sesuai dengan filter</p>
+                                            <p class="text-xs text-gray-400">
+                                                Coba ubah kriteria pencarian atau filter Anda
+                                            </p>
+                                            <button wire:click="resetFilters" 
+                                                    class="mt-3 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200 transition-colors">
+                                                Reset Filter
+                                            </button>
+                                        @else
+                                            <p class="font-medium mb-2">Belum ada member terdaftar</p>
+                                            <p class="text-xs text-gray-400">
+                                                Member yang baru mendaftar akan muncul di sini
+                                            </p>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-6">
             {{ $verifiedMembers->links() }}
         </div>
+
+        <!-- Results Summary -->
+        @if($verifiedMembers->count() > 0)
+            <div class="mt-4 text-sm text-gray-600 text-center">
+                Menampilkan {{ $verifiedMembers->firstItem() }} - {{ $verifiedMembers->lastItem() }} 
+                dari {{ $verifiedMembers->total() }} member
+                @if($searchVerifiedMember || $filterMemberType || $filterStatus)
+                    (difilter)
+                @endif
+            </div>
+        @endif
     </div>
+
+    
 
 
 
 
     <!--modals-->
     @if($isInputModalOpen)
-        <div class="fixed z-50 inset-0 flex items-center justify-center bg-warna-300/50 ">
-            <x-input-modal class="relative bg-white rounded-lg shadow-lg p-6 mx-7 md:mx-0 w-full {{ $verifikasiMemberMode ? 'max-w-lg' : ($detailMemberMode ? 'max-w-4xl' : 'max-w-2xl') }}">
-                @if($verifikasiMemberMode)
-                    <x-slot name="title">Verifikasi Member</x-slot>
-                    <x-slot name="subtitle" >Tentukan jenis member sebelum melakukan verifikasi.</x-slot>
-                    <form wire:submit.prevent='verifyMember' class="w-full mt-8 md:mt-12">
-                        <x-g-input 
-                            wire:model.live="member_type"
-                            type="select"
-                            class="mb-5 md:mb-6"
-                            label="Jenis Member"
-                            :options="[
-                                'local' => 'Local',
-                                'foreign' => 'Foreign'
-                            ]"
-                        />
-                        @if($member_type === 'foreign')
-                            <x-g-input 
-                                wireModel="durationMembership"
-                                type="select"
-                                class="mb-4"
-                                label="Durasi Keanggotaan"
-                                :options="[
-                                'one_month' => 'Satu Bulan',
-                                'three_weeks' => 'Tiga Minggu',
-                                'two_weeks' => 'Dua Minggu',
-                                'one_week' => 'Satu Minggu',
-                            ]"
-                            />
-                        @endif
-                        <div class="flex justify-end mt-8 md:mt-9">
-                            <button @click="show = false"  type="button" wire:click="closeInputModal" class="px-5 py-2 bg-gray-300 hover:bg-gray-300/80 active:scale-95 transition-all text-gray-700 rounded-lg mr-2">Batal</button>
-                            <button type="submit" class="px-5 py-2 bg-warna-700 hover:bg-warna-700/80 active:scale-95 transition-all text-white rounded-lg">Simpan</button>
-                        </div>
-                    </form>
-                @elseif($TambahMemberMode)
+        <div class="fixed z-50 inset-0 flex items-center justify-center bg-warna-300/50 backdrop-blur-sm">
+            <x-input-modal class="relative bg-white rounded-lg shadow-lg p-6 mx-7 md:mx-0 w-full {{ ($detailMemberMode ? 'max-w-4xl' : 'max-w-2xl') }}">
+                
+                @if($TambahMemberMode)
                     <x-slot name="title">Tambah Member</x-slot>
                     <x-slot name="subtitle" >Silakan lengkapi informasi berikut untuk menambahkan member baru.</x-slot>
                     <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6 mt-5">
@@ -236,34 +340,99 @@
                     <div class="max-h-[60vh] overflow-y-auto py-2 mt-6">
                         <!-- Informasi Member -->
                         <div class="mb-6">
-                            <h3 class="md:text-lg font-semibold mb-4 text-gray-800">Informasi Member</h3>
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="md:text-lg font-semibold text-gray-800">Informasi Member</h3>
+                                <div class="flex items-center gap-2">
+                                    <!-- Status Dropdown dengan semua status -->
+                                    <div class="relative" x-data="{ open: false }">
+                                        <button @click="open = !open" 
+                                                class="flex items-center px-3 py-1 text-xs rounded-full border
+                                                {{ $memberDetail['status'] === 'active' ? 'bg-green-100 text-green-800 border-green-200' : 
+                                                ($memberDetail['status'] === 'frozen' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : 
+                                                ($memberDetail['status'] === 'inactive' ? 'bg-red-100 text-red-800 border-red-200' :
+                                                ($memberDetail['status'] === 'pending_email_verification' ? 'bg-orange-100 text-orange-800 border-orange-200' : 'bg-purple-100 text-purple-800 border-purple-200'))) }}
+                                                hover:opacity-80 transition-opacity">
+                                            {{ str_replace('_', ' ', ucfirst($memberDetail['status'])) }}
+                                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                        </button>
+                                        
+                                        <div x-show="open" @click.away="open = false" 
+                                            x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter-start="transform opacity-0 scale-95"
+                                            x-transition:enter-end="transform opacity-100 scale-100"
+                                            x-transition:leave="transition ease-in duration-75"
+                                            x-transition:leave-start="transform opacity-100 scale-100"
+                                            x-transition:leave-end="transform opacity-0 scale-95"
+                                            class="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                                            <div class="py-1">
+                                                <button wire:click="changeStatus('active')" 
+                                                        @click="open = false"
+                                                        class="flex items-center w-full px-3 py-2 text-xs text-green-700 hover:bg-green-50 transition-colors">
+                                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                    Active
+                                                </button>
+                                                <button wire:click="changeStatus('frozen')" 
+                                                        @click="open = false"
+                                                        class="flex items-center w-full px-3 py-2 text-xs text-yellow-700 hover:bg-yellow-50 transition-colors">
+                                                    <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                                                    Frozen
+                                                </button>
+                                                <button wire:click="changeStatus('inactive')" 
+                                                        @click="open = false"
+                                                        class="flex items-center w-full px-3 py-2 text-xs text-red-700 hover:bg-red-50 transition-colors">
+                                                    <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                                                    Inactive
+                                                </button>
+                                                <button wire:click="changeStatus('pending_email_verification')" 
+                                                        @click="open = false"
+                                                        class="flex items-center w-full px-3 py-2 text-xs text-orange-700 hover:bg-orange-50 transition-colors">
+                                                    <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
+                                                    Pending Email
+                                                </button>
+                                                <button wire:click="changeStatus('pending_admin_verification')" 
+                                                        @click="open = false"
+                                                        class="flex items-center w-full px-3 py-2 text-xs text-purple-700 hover:bg-purple-50 transition-colors">
+                                                    <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                                                    Pending Admin
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Edit Button -->
+                                    <button wire:click="openEditMemberModal" 
+                                            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors">
+                                        <i class="fas fa-edit mr-1"></i>Edit
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Member details grid tetap sama -->
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <div class="mb-1.5">
                                     <strong class="text-gray-600">Nama:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail->name }}</span>
+                                    <span class="text-gray-900">{{ $memberDetail['name'] }}</span>
                                 </div>
                                 <div class="mb-1.5">
                                     <strong class="text-gray-600">Email:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail->email }}</span>
+                                    <span class="text-gray-900">{{ $memberDetail['email'] }}</span>
+                                </div>
+                                <div class="mb-1.5">
+                                    <strong class="text-gray-600">Username:</strong> 
+                                    <span class="text-gray-900">{{ $memberDetail['username'] }}</span>
                                 </div>
                                 <div class="mb-1.5">
                                     <strong class="text-gray-600">Nomor Telepon:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail->nomor_telepon }}</span>
-                                </div>
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Status:</strong> 
-                                    <span class="px-2 py-1 text-xs rounded-full {{ $memberDetail->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ ucfirst($memberDetail->status) }}
-                                    </span>
+                                    <span class="text-gray-900">{{ $memberDetail['nomor_telepon'] }}</span>
                                 </div>
                                 <div class="mb-1.5">
                                     <strong class="text-gray-600">Jenis Member:</strong> 
-                                    <span class="text-gray-900">{{ ucfirst($memberDetail->member_type) }}</span>
+                                    <span class="text-gray-900">{{ ucfirst($memberDetail['member_type']) }}</span>
                                 </div>
-                                @if($memberDetail->membership_expiration_date)
+                                @if($memberDetail['membership_expiration_date'])
                                     <div class="mb-1.5">
                                         <strong class="text-gray-600">Tanggal Expired:</strong> 
-                                        <span class="text-gray-900">{{ $memberDetail->membership_expiration_date->format('d/m/Y') }}</span>
+                                        <span class="text-gray-900">{{ \Carbon\Carbon::parse($memberDetail['membership_expiration_date'])->format('d/m/Y') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -400,8 +569,159 @@
                         
                         <button @click="show = false"  type="button" wire:click="closeInputModal()" class="px-5 lg:px-7 py-2 bg-gray-300 hover:bg-gray-300/80 active:scale-95 transition-all text-gray-700 rounded-lg mr-2">Tutup</button>
                     </div>
-
                 @endif
+            </x-input-modal>
+        </div>
+    @endif
+
+     @if($isEditModalOpen)
+        <div class="fixed z-50 inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm" 
+             x-data="{ show: false }" 
+             x-init="$nextTick(() => show = true)"
+             x-show="show" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+            
+            <x-input-modal class="relative bg-white rounded-xl shadow-2xl mx-4 md:mx-0 w-full max-w-3xl max-h-[90vh] p-6"
+                           x-show="show"
+                           x-transition:enter="transition ease-out duration-300 delay-100"
+                           x-transition:enter-start="opacity-0 scale-95 translate-y-4"
+                           x-transition:enter-end="opacity-1 scale-100 translate-y-0"
+                           x-transition:leave="transition ease-in duration-200"
+                           x-transition:leave-start="opacity-1 scale-100 translate-y-0"
+                           x-transition:leave-end="opacity-0 scale-95 translate-y-4">
+                
+                <x-slot name="title">
+                    Edit Member
+                </x-slot>
+                <x-slot name="subtitle">
+                    Perbarui informasi member yang dipilih
+                </x-slot>
+
+                <div class="max-h-[50vh] overflow-y-auto mt-6">
+                    <form wire:submit.prevent="updateMember">
+                        <div class="space-y-6">
+                            <!-- Personal Information Section -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-user mr-2 text-blue-600"></i>
+                                    Informasi Pribadi
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <x-g-input 
+                                        wire:model.live="editName"
+                                        label="Nama Lengkap"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                    
+                                    <x-g-input 
+                                        wire:model.live="editEmail"
+                                        type="email"
+                                        label="Email"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                    
+                                    <x-g-input 
+                                        wire:model.live="editUsername"
+                                        label="Username"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                    
+                                    <x-g-input 
+                                        wire:model.live="editNomorTelepon"
+                                        type="number"
+                                        label="Nomor Telepon"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Membership Information Section -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-id-card mr-2 text-green-600"></i>
+                                    Informasi Keanggotaan
+                                </h3>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <x-g-input 
+                                        wire:model.live="editMemberType"
+                                        type="select"
+                                        label="Jenis Member"
+                                        :options="[
+                                            'local' => 'Local',
+                                            'foreign' => 'Foreign'
+                                        ]"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                    
+                                    <x-g-input 
+                                        wire:model.live="selectedStatus"
+                                        type="select"
+                                        label="Status"
+                                        :options="[
+                                            'active' => 'Active',
+                                            'frozen' => 'Frozen',
+                                            'inactive' => 'Inactive',
+                                            'pending_email_verification' => 'Pending Email Verification',
+                                            'pending_admin_verification' => 'Pending Admin Verification'
+                                        ]"
+                                        class="transition-all duration-200 focus:scale-105"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Security Section -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-6">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-lock mr-2 text-red-600"></i>
+                                    Keamanan
+                                </h3>
+                                <x-g-input 
+                                    wire:model.live="editPassword"
+                                    type="password"
+                                    label="Password Baru"
+                                    placeholder="Kosongkan jika tidak ingin mengubah password"
+                                    class="transition-all duration-200 focus:scale-105"
+                                />
+                            </div>
+                        </div>
+
+                        <!-- Error Messages -->
+                        @if($errors->any())
+                            <div class="mt-6 bg-red-50 border border-red-200 rounded-xl p-4">
+                                <div class="flex items-start">
+                                    <i class="fas fa-exclamation-circle text-red-500 mt-0.5 mr-3"></i>
+                                    <div>
+                                        <h4 class="text-red-800 font-medium mb-1">Terdapat kesalahan:</h4>
+                                        <ul class="text-red-700 text-sm space-y-1">
+                                            @foreach($errors->all() as $error)
+                                                <li>• {{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </form>
+                </div>
+
+                <!-- Footer Actions -->
+                <x-slot name="actions">
+                    <div class="flex items-center justify-end w-full space-x-3">
+                        <button type="button" @click="show = false; setTimeout(() => $wire.closeEditModal(), 200)" 
+                                class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200">
+                            Batal
+                        </button>
+                        <button wire:click="updateMember" 
+                                class="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105">
+                            <i class="fas fa-save mr-2"></i>Simpan Perubahan
+                        </button>
+                    </div>
+                </x-slot>
             </x-input-modal>
         </div>
     @endif

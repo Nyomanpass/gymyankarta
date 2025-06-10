@@ -45,70 +45,70 @@
 
             <!-- Main Layout -->
             <div class="flex pt-16 lg:gap-3">
-                  <!-- Sidebar -->
-                  <aside class="hidden lg:block left-0 top-16 h-[calc(100vh-4rem)] w-86 bg-warna-300 shadow-lg overflow-y-auto">
-                        <div class="p-4 mt-3">
-                              <nav class="space-y-3">
-                                    <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('dashboard') ? 'bg-warna-400' : '' }}">
-                                          <i class="fa-solid fa-house mr-3"></i>
-                                          <span>Dashboard</span>
-                                    </a>
-                                    
-                                    <a href="{{ route('kelola.pendapatan') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('kelola.pendapatan') ? 'bg-warna-400' : '' }}">
-                                          <i class="fa-solid fa-money-bill-trend-up mr-3"></i>
-                                          <span>Kasir</span>
-                                    </a>
-                                    <a href="{{ route('kelola.member') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('kelola.member') ? 'bg-warna-400' : '' }}"">
-                                          <i class="fa-solid fa-user mr-3"></i>
-                                          <span>Kelola Member</span>
-                                    </a>
-                                    <a href="{{ route('pengaturan.harga') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('pengaturan.harga') ? 'bg-warna-400' : '' }}">
-                                          <i class="fa-solid fa-gear mr-3"></i>
-                                          <span>Pengaturan Harga</span>
-                                    </a>
-                                    <div class="relative" x-data="{ dropdownOpen: false }">
-                                          <button @click="dropdownOpen = !dropdownOpen" 
-                                                      class="flex items-center w-full px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
-                                                <i class="fa-solid fa-chart-line mr-3"></i>
-                                                <span>Laporan</span>
-                                                <i class="fa-solid fa-chevron-down ml-auto transition-transform" 
-                                                   :class="{ 'rotate-180': dropdownOpen }"></i>
-                                          </button>
-                                          
-                                          <div x-show="dropdownOpen" 
-                                                x-cloak
-                                                 x-transition:enter="transition ease-out duration-200"
-                                                 x-transition:enter-start="opacity-0 transform scale-95"
-                                                 x-transition:enter-end="opacity-100 transform scale-100"
-                                                 x-transition:leave="transition ease-in duration-75"
-                                                 x-transition:leave-start="opacity-100 transform scale-100"
-                                                 x-transition:leave-end="opacity-0 transform scale-95"
-                                                 class="ml-6 mt-2 space-y-2">
-                                                <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
-                                                      <i class="fa-solid fa-users mr-3"></i>
-                                                      <span>Laporan Member</span>
+                    <!-- Sidebar -->
+                    <aside class="hidden lg:block fixed left-0 top-16 h-[calc(100vh-4rem)] w-60 xl:w-78 bg-warna-300 shadow-lg overflow-y-auto z-30">
+                              <div class="p-4 mt-3">
+                                      <nav class="space-y-3">
+                                                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('dashboard') ? 'bg-warna-400' : '' }}">
+                                                      <i class="fa-solid fa-house mr-3"></i>
+                                                      <span>Dashboard</span>
                                                 </a>
-                                                <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
-                                                      <i class="fa-solid fa-dollar-sign mr-3"></i>
-                                                      <span>Laporan Pendapatan</span>
+                                                
+                                                <a href="{{ route('kelola.pendapatan') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('kelola.pendapatan') ? 'bg-warna-400' : '' }}">
+                                                      <i class="fa-solid fa-money-bill-trend-up mr-3"></i>
+                                                      <span>Kasir</span>
                                                 </a>
-                                          </div>
-                                    </div>
-                                    <!-- Logout Confirmation Modal -->
-                                    <a href="#" @click="showLogoutModal = true" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
-                                          <i class="fa-solid fa-right-from-bracket mr-3"></i>
-                                          <span>Logout</span>
-                                    </a>
-                              </nav>
-                        </div>
-                  </aside>
+                                                <a href="{{ route('kelola.member') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('kelola.member') ? 'bg-warna-400' : '' }}">
+                                                      <i class="fa-solid fa-user mr-3"></i>
+                                                      <span>Kelola Member</span>
+                                                </a>
+                                                <a href="{{ route('pengaturan.harga') }}" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('pengaturan.harga') ? 'bg-warna-400' : '' }}">
+                                                      <i class="fa-solid fa-gear mr-3"></i>
+                                                      <span>Pengaturan Harga</span>
+                                                </a>
+                                                <div class="relative" x-data="{ dropdownOpen: false }">
+                                                        <button @click="dropdownOpen = !dropdownOpen" 
+                                                                  class="flex items-center w-full px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
+                                                                  <i class="fa-solid fa-chart-line mr-3"></i>
+                                                                  <span>Laporan</span>
+                                                                  <i class="fa-solid fa-chevron-down ml-auto transition-transform" 
+                                                                  :class="{ 'rotate-180': dropdownOpen }"></i>
+                                                        </button>
+                                                        
+                                                        <div x-show="dropdownOpen" 
+                                                                  x-cloak
+                                                                  x-transition:enter="transition ease-out duration-200"
+                                                                  x-transition:enter-start="opacity-0 transform scale-95"
+                                                                  x-transition:enter-end="opacity-100 transform scale-100"
+                                                                  x-transition:leave="transition ease-in duration-75"
+                                                                  x-transition:leave-start="opacity-100 transform scale-100"
+                                                                  x-transition:leave-end="opacity-0 transform scale-95"
+                                                                  class="ml-6 mt-2 space-y-2">
+                                                                  <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+                                                                        <i class="fa-solid fa-users mr-3"></i>
+                                                                        <span>Laporan Member</span>
+                                                                  </a>
+                                                                  <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+                                                                        <i class="fa-solid fa-dollar-sign mr-3"></i>
+                                                                        <span>Laporan Pendapatan</span>
+                                                                  </a>
+                                                        </div>
+                                                </div>
+                                                <!-- Logout Confirmation Modal -->
+                                                <a href="#" @click="showLogoutModal = true" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
+                                                      <i class="fa-solid fa-right-from-bracket mr-3"></i>
+                                                      <span>Logout</span>
+                                                </a>
+                                      </nav>
+                              </div>
+                    </aside>
 
-                  <!-- Main Content -->
-                  <main class="w-full transition-all duration-200">
+                    <!-- Main Content -->
+                    <main class="w-full lg:ml-60 xl:ml-78 transition-all duration-200">
                         <div class="p-4 sm:p-6 bg-gray-100 min-h-[calc(100vh-4rem)]">
                               {{ $slot }}
                         </div>
-                  </main>
+                    </main>
             </div>
 
             <!-- -- Mobile Sidebar Toggle (alter2) -->
