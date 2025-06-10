@@ -35,7 +35,6 @@ class KelolaMember extends Component
     //properties untuk filter
     public $filterMemberType = '';
     public $filterStatus = '';
-    public $showFilters = false;
 
     // detail member
     public $memberDetail = [];
@@ -66,6 +65,20 @@ class KelolaMember extends Component
     public $selectedStatus = '';
     public $editPassword = '';
 
+    //pagination propertiesw
+    public $perPage = 10;
+    public $sortField = 'created_at';
+    public $sortDirection = 'desc';
+
+    protected $updateQueryString = [
+        'searchVerifiedMember' => ['except' => ''],
+        'filterMemberType' => ['except' => ''],
+        'filterStatus' => ['except' => ''],
+        'perPege' => ['except' => 10],
+        'sortField' => ['except' => 'created_at'],
+        'sortDirection' => ['except' => 'desc'],
+    ];
+
     protected $paginationTheme = 'tailwind';
 
     public function mount()
@@ -81,13 +94,21 @@ class KelolaMember extends Component
             $this->isNotificationModalOpen = true;
         }
 
+        $verifiedMembers = $this->getVerifiedMembersQuery();
+
+        return view('livewire.kelola-member', compact('verifiedMembers'));
+    }
+
+    public function getVerifiedMembersQuery()
+    {
         // Query untuk verified members dengan filter
-        $verifiedMembers = User::members()
+        return User::members()
             ->when($this->searchVerifiedMember, function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery->where('name', 'like', '%' . $this->searchVerifiedMember . '%')
                         ->orWhere('username', 'like', '%' . $this->searchVerifiedMember . '%')
-                        ->orWhere('email', 'like', '%' . $this->searchVerifiedMember . '%');
+                        ->orWhere('email', 'like', '%' . $this->searchVerifiedMember . '%')
+                        ->orWhere('nomor_telepon', 'like', '%' . $this->searchVerifiedMember . '%');
                 });
             })
             ->when($this->filterMemberType, function ($query) {
@@ -96,32 +117,43 @@ class KelolaMember extends Component
             ->when($this->filterStatus, function ($query) {
                 $query->where('status', $this->filterStatus);
             })
-            ->orderBy('created_at', 'desc')
-            ->paginate(10, ['*'], 'verifiedPage');
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage, ['*'], 'page');
+    }
 
-        return view('livewire.kelola-member', compact('verifiedMembers'));
+    public function sortBy($field)
+    {
+        if($this->sortField === $field){
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+
+        $this->resetPage();
+    }
+
+    public function updatedPerPage()
+    {
+        $this->resetPage();
     }
 
     // Update methods for filter
     public function updatedSearchVerifiedMember()
     {
-        $this->resetPage('verifiedPage');
+        $this->resetPage();
     }
 
     public function updatedFilterMemberType()
     {
-        $this->resetPage('verifiedPage');
+        $this->resetPage();
     }
 
     public function updatedFilterStatus()
     {
-        $this->resetPage('verifiedPage');
+        $this->resetPage();
     }
 
-    public function toggleFilters()
-    {
-        $this->showFilters = !$this->showFilters;
-    }
 
     public function resetFilters()
     {
@@ -129,7 +161,7 @@ class KelolaMember extends Component
         $this->filterStatus = '';
         $this->searchVerifiedMember = '';
         $this->showFilters = false;
-        $this->resetPage('verifiedPage');
+        $this->resetPage();
     }
 
     // Method untuk mendapatkan count berdasarkan filter
@@ -142,7 +174,8 @@ class KelolaMember extends Component
             $baseQuery->where(function ($q) {
                 $q->where('name', 'like', '%' . $this->searchVerifiedMember . '%')
                     ->orWhere('email', 'like', '%' . $this->searchVerifiedMember . '%')
-                    ->orWhere('username', 'like', '%' . $this->searchVerifiedMember . '%');
+                    ->orWhere('username', 'like', '%' . $this->searchVerifiedMember . '%')
+                    ->orWhere('nomor_telepon', 'like', '%' . $this->searchVerifiedMember . '%');
             });
         }
 
@@ -155,6 +188,23 @@ class KelolaMember extends Component
             'inactive' => (clone $baseQuery)->where('status', 'inactive')->count(),
             'pending_email_verification' => (clone $baseQuery)->where('status', 'pending_email_verification')->count(),
             'pending_admin_verification' => (clone $baseQuery)->where('status', 'pending_admin_verification')->count(),
+        ];
+    }
+
+    public function getPaginationInfo()
+    {
+        $members = $this->getVerifiedMembersQuery();
+
+        return [
+            'currentPage' => $members->currentPage(),
+            'lastPage' => $members->lastPage(),
+            'total' => $members->total(),
+            'perPage' => $members->perPage(),
+            'from' => $members->firstItem(),
+            'to' => $members->lastItem(),
+            'hasPages' => $members->hasPages(),
+            'onFirstPage' => $members->onFirstPage(),
+            'hasMorePages' => $members->hasMorePages()
         ];
     }
 
