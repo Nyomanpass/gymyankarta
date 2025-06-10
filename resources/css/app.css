@@ -52,6 +52,8 @@
     --color-accent: var(--color-neutral-800);
     --color-accent-content: var(--color-neutral-800);
     --color-accent-foreground: var(--color-white);
+
+    --breakpoint-sm: 425px;
 }
 
 @layer theme {

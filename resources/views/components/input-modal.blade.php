@@ -1,3 +1,5 @@
+@props(['title' => '', 'subtitle' => '', 'actions' => null])
+
 <div 
     x-data="{ show: false }"
     x-init="setTimeout(() => show = true, 10)"
@@ -10,10 +12,33 @@
     x-transition:leave-end="opacity-0 scale-50"
     {{ $attributes->merge(['class' => 'bg-white rounded-lg shadow-lg']) }}
 >
-    <h1 class="text-lg md:text-xl xl:text-2xl font-semibold mb-2">{{ $title }}</h1>
-    <p class="text-sm md:text-base">{{ $subtitle }}</p>
+    @if($title || $subtitle)
+        <div class="mb-6">
+            @if($title)
+                <h1 class="text-lg md:text-xl xl:text-2xl font-semibold mb-2 text-gray-900">
+                    {{ $title }}
+                </h1>
+            @endif
+            
+            @if($subtitle)
+                <p class="text-sm md:text-base text-gray-600">
+                    {{ $subtitle }}
+                </p>
+            @endif
+        </div>
+    @endif
 
-    {{ $slot }}
+    <!-- Main Content -->
+    <div class="flex-1">
+        {{ $slot }}
+    </div>
+
+    <!-- Actions Section -->
+    @isset($actions)
+        <div class="mt-6 pt-4 border-t border-gray-200">
+            {{ $actions }}
+        </div>
+    @endisset
 
     
 </div>

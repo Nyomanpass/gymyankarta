@@ -76,6 +76,13 @@ class Transaction extends Model
         return $query->whereBetween('transaction_datetime', [$startDate, $endDate]);
     }
 
+    public function getFormattedAmountAttribute()
+    {
+        return 'Rp ' . number_format($this->total_amount, 0, ',', '.');
+    }
+
+
+
     //helper method
     public function isMembershipPayment()
     {
