@@ -31,7 +31,11 @@ class Login extends Component
             'password.required' => 'Password tidak boleh kosong.',
         ]);
 
+
+
         $user = User::where('username', $this->username)->first();
+
+  
 
         if ($user && Hash::check($this->password, $user->password)) {
             if ($user->status === 'active' || $user->status === 'frozen') {

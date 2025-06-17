@@ -32,12 +32,15 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('/pengaturan-harga', \App\Livewire\PengaturanHarga::class)->name('pengaturan.harga');
 
-
         Route::get('/qr/attendance', [App\Http\Controllers\QrCodeController::class, 'showQrCode'])
             ->name('qr.attendance');
 
         Route::get('/qr/test', [App\Http\Controllers\QrCodeController::class, 'testQr'])
             ->name('qr.test');
+
+        Route::get('/laporan/member', \App\Livewire\LaporanMember::class)->name('laporan.member');
+        Route::get('/laporan/pendapatan', \App\Livewire\LaporanPendapatan::class)->name('laporan.pendapatan');
+        Route::get('/reset-password', \App\Livewire\ResetPassword::class)->name('reset.password');
     });
 
     Route::get('/logout', [\App\Livewire\Login::class, 'logout'])->name('logout');

@@ -86,35 +86,49 @@
                             <span class="truncate">Pengaturan Harga</span>
                         </a>
                         
-                        <div class="relative" x-data="{ dropdownOpen: false }">
+                        @php
+                            $isLaporanActive = request()->routeIs('laporan.member') || request()->routeIs('laporan.pendapatan');
+                        @endphp
+
+                        <div class="relative" x-data="{ dropdownOpen: {{ $isLaporanActive ? 'true' : 'false' }} }">
                             <button @click="dropdownOpen = !dropdownOpen" 
                                     class="flex items-center w-full px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                                 <i class="fa-solid fa-chart-line mr-3 flex-shrink-0"></i>
                                 <span class="truncate">Laporan</span>
                                 <i class="fa-solid fa-chevron-down ml-auto transition-transform flex-shrink-0" 
-                                   :class="{ 'rotate-180': dropdownOpen }"></i>
+                                :class="{ 'rotate-180': dropdownOpen }"></i>
                             </button>
                             
                             <div x-show="dropdownOpen" 
-                                 x-cloak
-                                 x-transition:enter="transition ease-out duration-200"
-                                 x-transition:enter-start="opacity-0 transform scale-95"
-                                 x-transition:enter-end="opacity-100 transform scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="transform opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 transform scale-95"
-                                 class="ml-6 mt-2 space-y-2">
-                                <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+                                x-cloak
+                                x-transition:enter="transition ease-out duration-200"
+                                x-transition:enter-start="opacity-0 transform scale-95"
+                                x-transition:enter-end="opacity-100 transform scale-100"
+                                x-transition:leave="transition ease-in duration-75"
+                                x-transition:leave-start="transform opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 transform scale-95"
+                                class="ml-6 mt-2 space-y-2">
+
+                                <a href="{{ route('laporan.member') }}" 
+                                class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm {{ request()->routeIs('laporan.member') ? 'bg-warna-400' : '' }}">
                                     <i class="fa-solid fa-users mr-3 flex-shrink-0"></i>
                                     <span class="truncate">Laporan Member</span>
                                 </a>
-                                <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+
+                                <a href="{{ route('laporan.pendapatan') }}" 
+                                class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm {{ request()->routeIs('laporan.pendapatan') ? 'bg-warna-400' : '' }}">
                                     <i class="fa-solid fa-dollar-sign mr-3 flex-shrink-0"></i>
                                     <span class="truncate">Laporan Pendapatan</span>
                                 </a>
+
                             </div>
                         </div>
-                        
+
+                        <a href="{{ route('reset.password') }}"
+                            class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('reset.password') ? 'bg-warna-400' : '' }}">
+                            <i class="fa-solid fa-rotate-left mr-2"></i>
+                            <span class="truncate">Reset Password</span>
+                        </a>
                         <a href="#" @click="showLogoutModal = true" class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                             <i class="fa-solid fa-right-from-bracket mr-3 flex-shrink-0"></i>
                             <span class="truncate">Logout</span>
@@ -141,7 +155,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click="sidebarOpen = false"
-             class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+             class="lg:hidden fixed inset-0 bg-warna-300/50 z-40">
         </div>
 
         <!-- Mobile Sidebar -->
@@ -192,7 +206,8 @@
                     <i class="fa-solid fa-gear mr-3 flex-shrink-0"></i>
                     <span class="truncate">Pengaturan Harga</span>
                 </a>
-                <div class="relative" x-data="{ dropdownOpen: false }">
+
+                <div class="relative" x-data="{ dropdownOpen: {{ $isLaporanActive ? 'true' : 'false' }} }">
                     <button @click="dropdownOpen = !dropdownOpen" 
                             class="flex items-center w-full px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                         <i class="fa-solid fa-chart-line mr-3 flex-shrink-0"></i>
@@ -210,16 +225,22 @@
                          x-transition:leave-start="opacity-100 transform scale-100"
                          x-transition:leave-end="opacity-0 transform scale-95"
                          class="ml-6 mt-2 space-y-2">
-                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+                        <a href="{{ route('laporan.member') }}" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm {{ request()->routeIs('laporan.member') ? 'bg-warna-400' : '' }}">
                             <i class="fa-solid fa-users mr-3 flex-shrink-0"></i>
                             <span class="truncate">Laporan Member</span>
                         </a>
-                        <a href="#" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm">
+                        <a href="{{ route('laporan.pendapatan') }}" class="flex items-center px-4 py-2 text-white hover:bg-warna-400 rounded-lg transition-colors text-sm {{ request()->routeIs('laporan.pendapatan') ? 'bg-warna-400' : '' }}">
                             <i class="fa-solid fa-dollar-sign mr-3 flex-shrink-0"></i>
                             <span class="truncate">Laporan Pendapatan</span>
                         </a>
                     </div>
                 </div>
+              <a href="{{ route('reset.password') }}"
+                class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors {{ request()->routeIs('reset.password') ? 'bg-warna-400' : '' }}">
+                    <i class="fa-solid fa-key mr-3 flex-shrink-0"></i> <!-- Disarankan pakai icon fa-key -->
+                    <span class="truncate">Reset Password</span>
+                </a>
+
                 <a href="#" @click="showLogoutModal = true" 
                    class="flex items-center px-4 py-3 text-white hover:bg-warna-400 rounded-lg transition-colors">
                     <i class="fa-solid fa-right-from-bracket mr-3 flex-shrink-0"></i>
@@ -238,7 +259,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+         class="fixed inset-0 bg-warna-300/50 z-50 flex items-center justify-center p-4">
                         
         <div x-show="showLogoutModal"
              x-cloak
@@ -270,7 +291,11 @@
         </div>
     </div>
 
+
+
     @livewireScripts
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+    @stack('scripts')
 </body>
 </html>
