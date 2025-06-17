@@ -24,6 +24,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kelola-member', \App\Livewire\KelolaMember::class)->name('kelola.member');
 
         ROute::get('/pengaturan-harga', \App\Livewire\PengaturanHarga::class)->name('pengaturan.harga');
+        Route::get('/laporan/member', \App\Livewire\LaporanMember::class)->name('laporan.member');
+        Route::get('/laporan/pendapatan', \App\Livewire\LaporanPendapatan::class)->name('laporan.pendapatan');
+        Route::get('/reset-password', \App\livewire\ResetPassword::class)->name('reset.password');
     });
 
     Route::get('/logout', [\App\Livewire\Login::class, 'logout'])->name('logout');
