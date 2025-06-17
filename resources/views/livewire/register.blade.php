@@ -1,9 +1,9 @@
-<div class="flex items-center justify-center min-h-screen ">
-    <div class="w-full max-w-lg p-8">
+<div class="flex items-center justify-center ">
+    <div class="w-full max-w-xl p-8">
         <div class="mb-10 lg:mb-14">
-            <div class="mb-3 mx-auto w-24 h-24 bg-warna-500 flex items-center justify-center rounded-full p-1">
+            <a href="{{ route('home') }}" class="mb-3 mx-auto w-24 h-24 bg-warna-500 flex items-center justify-center rounded-full p-1">
                 <img src="{{ asset('logo.png') }}" alt="Logo" class="w-full h-full object-cover">
-            </div>
+            </a>
             <h2 class="text-2xl md:text-3xl lg:text-4xl font-semibold text-center mb-2">Buat Akun Barumu</h2>
             <p class="text-center text-warna-300">Bergabung bersama kami untuk mendapatkan akses ekslusif di GYMYAKARTA</p>
         </div>

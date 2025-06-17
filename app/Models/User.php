@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
 
 class User extends Authenticatable
 {
@@ -99,5 +100,57 @@ class User extends Authenticatable
         return !$this->attendances()
             ->whereDate('check_in_datetime', today())
             ->exists();
+    }
+
+
+
+    public function isExpired()
+    {
+        return $this->membership_expiration_date &&
+            Carbon::parse($this->membership_expiration_date)->isPast();
+    }
+
+    public function isExpiredMoreThan($months = 2)
+    {
+        return $this->membership_expiration_date &&
+            Carbon::parse($this->membership_expiration_date)
+            ->addMonths($months)
+            ->isPast();
+    }
+
+    public function getDaysUntilExpiration()
+    {
+        if (!$this->membership_expiration_date) {
+            return null;
+        }
+
+        $expiration = Carbon::parse($this->membership_expiration_date);
+        $now = Carbon::now();
+
+        if ($expiration->isPast()) {
+            return 0;
+        }
+
+        return $now->diffInDays($expiration);
+    }
+
+    public function shouldBecomeFrozen()
+    {
+        return $this->status === 'active' && $this->isExpired();
+    }
+
+    public function shouldBecomeInactive()
+    {
+        return $this->status === 'frozen' && $this->isExpiredMoreThan(2);
+    }
+
+    public function getStatusBadgeAttribute()
+    {
+        return match ($this->status) {
+            'active' => '<span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Active</span>',
+            'frozen' => '<span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded-full">Frozen</span>',
+            'inactive' => '<span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Inactive</span>',
+            default => '<span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">Unknown</span>'
+        };
     }
 }

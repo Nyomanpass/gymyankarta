@@ -48,4 +48,16 @@ class Attendance extends Model
     {
         return $query->whereBetween('check_in_datetime', [$startDate, $endDate]);
     }
+
+    // Helper method untuk mendapatkan tanggal saja
+    public function getAttendanceDateAttribute()
+    {
+        return $this->check_in_datetime ? $this->check_in_datetime->format('Y-m-d') : null;
+    }
+
+    // Helper method untuk mendapatkan waktu saja
+    public function getAttendanceTimeAttribute()
+    {
+        return $this->check_in_datetime ? $this->check_in_datetime->format('H:i:s') : null;
+    }
 }

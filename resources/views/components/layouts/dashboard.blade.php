@@ -155,7 +155,7 @@
              x-transition:leave-start="opacity-100"
              x-transition:leave-end="opacity-0"
              @click="sidebarOpen = false"
-             class="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40">
+             class="lg:hidden fixed inset-0 bg-warna-300/50 z-40">
         </div>
 
         <!-- Mobile Sidebar -->
@@ -259,7 +259,7 @@
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
-         class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+         class="fixed inset-0 bg-warna-300/50 z-50 flex items-center justify-center p-4">
                         
         <div x-show="showLogoutModal"
              x-cloak
