@@ -27,6 +27,22 @@ class PengaturanHarga extends Component
     public $harga_pengunjung_harian;
     public $original_harga_membership_per_bulan;
     public $original_harga_pengunjung_harian;
+
+    // Tambah properties untuk foreign membership
+    public $foreign_1_week;
+    public $foreign_2_weeks;
+    public $foreign_3_weeks;
+    public $foreign_1_month;
+    public $original_foreign_1_week;
+    public $original_foreign_2_weeks;
+    public $original_foreign_3_weeks;
+    public $original_foreign_1_month;
+
+    //tambahan properti untuk daily visit fee foreign
+    public $harga_pengunjung_harian_foreign;
+    public $original_harga_pengunjung_harian_foreign;
+
+
     public $products;
 
     //form properties
@@ -39,10 +55,24 @@ class PengaturanHarga extends Component
     public function mount()
     {
         $this->harga_membership_per_bulan = Setting::get('base_monthly_membership_fee', 0);
-        $this->harga_pengunjung_harian = setting::get('daily_visit_fee', 0);
+        $this->harga_pengunjung_harian = Setting::get('daily_visit_fee', 0);
+        $this->harga_pengunjung_harian_foreign = Setting::get('daily_visit_fee_foreign', 0);
+
+        // Load foreign membership prices
+        $this->foreign_1_week = Setting::get('foreign_membership_1_week', 0);
+        $this->foreign_2_weeks = Setting::get('foreign_membership_2_weeks', 0);
+        $this->foreign_3_weeks = Setting::get('foreign_membership_3_weeks', 0);
+        $this->foreign_1_month = Setting::get('foreign_membership_1_month', 0);
 
         $this->original_harga_membership_per_bulan = $this->harga_membership_per_bulan;
         $this->original_harga_pengunjung_harian = $this->harga_pengunjung_harian;
+        $this->original_harga_pengunjung_harian_foreign = $this->harga_pengunjung_harian_foreign;
+
+        // Save original foreign prices
+        $this->original_foreign_1_week = $this->foreign_1_week;
+        $this->original_foreign_2_weeks = $this->foreign_2_weeks;
+        $this->original_foreign_3_weeks = $this->foreign_3_weeks;
+        $this->original_foreign_1_month = $this->foreign_1_month;
 
         $this->loadProducts();
     }
@@ -118,13 +148,30 @@ class PengaturanHarga extends Component
         $this->validate([
             'harga_membership_per_bulan' => 'required|numeric|min:0',
             'harga_pengunjung_harian' => 'required|numeric|min:0',
+            'harga_pengunjung_harian_foreign' => 'required|numeric|min:0',
+            'foreign_1_week' => 'required|numeric|min:0',
+            'foreign_2_weeks' => 'required|numeric|min:0',
+            'foreign_3_weeks' => 'required|numeric|min:0',
+            'foreign_1_month' => 'required|numeric|min:0',
         ]);
 
         Setting::set('base_monthly_membership_fee', $this->harga_membership_per_bulan);
         Setting::set('daily_visit_fee', $this->harga_pengunjung_harian);
+        Setting::set('daily_visit_fee_foreign', $this->harga_pengunjung_harian_foreign);
+
+        Setting::set('foreign_membership_1_week', $this->foreign_1_week);
+        Setting::set('foreign_membership_2_weeks', $this->foreign_2_weeks);
+        Setting::set('foreign_membership_3_weeks', $this->foreign_3_weeks);
+        Setting::set('foreign_membership_1_month', $this->foreign_1_month);
 
         $this->original_harga_membership_per_bulan = $this->harga_membership_per_bulan;
         $this->original_harga_pengunjung_harian = $this->harga_pengunjung_harian;
+        $this->original_harga_pengunjung_harian_foreign = $this->harga_pengunjung_harian_foreign;
+
+        $this->original_foreign_1_week = $this->foreign_1_week;
+        $this->original_foreign_2_weeks = $this->foreign_2_weeks;
+        $this->original_foreign_3_weeks = $this->foreign_3_weeks;
+        $this->original_foreign_1_month = $this->foreign_1_month;
 
         session()->flash('message', [
             'type' => 'success',

@@ -159,6 +159,17 @@
                             </div>
                         @endforelse
                     </div>
+                @elseif($transaction_type === 'daily_visit_fee')
+                    <x-g-input 
+                        label="Tipe Pengunjung"
+                        type="select"
+                        name="visitor_type"
+                        wire:model.live="visitor_type"
+                        :options="[
+                            'local' => 'Local',
+                            'foreign' => 'Foreign'
+                        ]"
+                    />
                 @endif
                 <x-g-input 
                     label="Deskripsi (Opsional)"
@@ -293,17 +304,17 @@
                             @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
                                 <div class="mt-2 text-xs text-gray-500">
                                     @switch($duration_membership)
-                                        @case('1_week')
-                                            <p>* 1 Minggu = 30% dari harga bulanan</p>
+                                        @case('one_week')
+                                            <p>* 1 Minggu - Harga tetap</p>
                                             @break
-                                        @case('2_weeks')
-                                            <p>* 2 Minggu = 50% dari harga bulanan</p>
+                                        @case('two_weeks')
+                                            <p>* 2 Minggu - Harga tetap</p>
                                             @break
-                                        @case('3_weeks')
-                                            <p>* 3 Minggu = 70% dari harga bulanan</p>
+                                        @case('three_weeks')
+                                            <p>* 3 Minggu - Harga tetap</p>
                                             @break
-                                        @case('1_month')
-                                            <p>* 1 Bulan = 100% harga bulanan</p>
+                                        @case('one_month')
+                                            <p>* 1 Bulan - Harga tetap</p>
                                             @break
                                     @endswitch
                                 </div>
@@ -320,7 +331,12 @@
                                 <span class="text-gray-600">Tipe:</span>
                                 <span class="font-medium">Pengunjung Harian</span>
                             </div>
-                             @if($description)
+                            <!-- ✅ TAMBAHKAN: Info tipe pengunjung -->
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Tipe Pengunjung:</span>
+                                <span class="font-medium">{{ ucfirst($visitor_type) }}</span>
+                            </div>
+                            @if($description)
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Deskripsi:</span>
                                     <span class="font-medium">{{ $description }}</span>
@@ -337,7 +353,8 @@
                             </span>
                         </div>
                         <div class="mt-2 text-xs text-gray-500">
-                            <p>* Tarif pengunjung harian per orang</p>
+                            <!-- ✅ UPDATE: Tunjukkan tipe dalam keterangan -->
+                            <p>* Tarif pengunjung harian {{ $visitor_type }} per orang</p>
                         </div>
                     </div>
                 </div>

@@ -27,6 +27,7 @@ class KelolaPendapatan extends Component
     public $duration_membership = '';
     public $description = '';
     public $payment_method = '';
+    public $visitor_type = 'local';
 
     // properties for options
     public $memberOptions = [];
@@ -73,7 +74,7 @@ class KelolaPendapatan extends Component
     {
         if ($message = session('message')) {
             $this->isNotificationModalOpen = true;
-        }   
+        }
 
 
         return view('livewire.kelola-pendapatan', [
@@ -107,7 +108,7 @@ class KelolaPendapatan extends Component
 
     private function loadSettings()
     {
-        $this->dailyVisitTotal = Setting::get('daily_visit_fee', 0);
+        $this->calculateDailyVisitTotal();
     }
 
     public function loadProducts()
@@ -149,6 +150,20 @@ class KelolaPendapatan extends Component
 
 
 
+    // Method transaksi harian
+    public function calculateDailyVisitTotal()
+    {
+        if ($this->visitor_type === 'foreign') {
+            $this->dailyVisitTotal = Setting::get('daily_visit_fee_foreign', 30000);
+        } else {
+            $this->dailyVisitTotal = Setting::get('daily_visit_fee', 15000);
+        }
+    }
+
+    public function updatedVisitorType($value)
+    {
+        $this->calculateDailyVisitTotal();
+    }
 
     //method transaksi additional items sale
     public function addProductToCart($productId)
@@ -219,23 +234,23 @@ class KelolaPendapatan extends Component
         if ($memberType === 'local') {
             $this->membershipTotal = Setting::get('base_monthly_membership_fee', 0);
         } elseif ($memberType === 'foreign' && $this->duration_membership) {
-            $baseFee = Setting::get('base_monthly_membership_fee', 0);
 
+            // Use fixed prices instead of percentage calculation
             switch ($this->duration_membership) {
                 case 'one_week':
-                    $this->membershipTotal = $baseFee * 0.3; // 1/4 dari biaya bulanan
+                    $this->membershipTotal = Setting::get('foreign_membership_1_week', 0);
                     break;
                 case 'two_weeks':
-                    $this->membershipTotal = $baseFee * 0.5; // 1/2 dari biaya bulanan
+                    $this->membershipTotal = Setting::get('foreign_membership_2_weeks', 0);
                     break;
                 case 'three_weeks':
-                    $this->membershipTotal = $baseFee * 0.7; // 3/4 dari biaya bulanan
+                    $this->membershipTotal = Setting::get('foreign_membership_3_weeks', 0);
                     break;
                 case 'one_month':
-                    $this->membershipTotal = $baseFee; // Biaya bulanan penuh
+                    $this->membershipTotal = Setting::get('foreign_membership_1_month', 0);
                     break;
                 default:
-                    $this->membershipTotal = 0; // Tidak valid
+                    $this->membershipTotal = 0;
             }
         } else {
             $this->membershipTotal = 0; // Tidak valid atau tidak ada member type
@@ -295,6 +310,7 @@ class KelolaPendapatan extends Component
         $this->payment_method = '';
         $this->selectedProducts = [];
         $this->totalAmount = 0;
+        $this->visitor_type = 'local';
         $this->dailyVisitTotal = 0;
 
         // Reload member options jika perlu
@@ -303,7 +319,7 @@ class KelolaPendapatan extends Component
         } elseif ($value === 'additional_items_sale') {
             $this->loadProducts();
         } elseif ($value === 'daily_visit_fee') {
-            $this->loadSettings();
+            $this->calculateDailyVisitTotal();
         }
     }
 
@@ -316,6 +332,7 @@ class KelolaPendapatan extends Component
             'selectedMember' => 'required_if:transaction_type,membership_payment',
             'member_type' => 'required_if:transaction_type,membership_payment',
             'selectedProducts' => 'required_if:transaction_type,additional_items_sale|array',
+            'visitor_type' => 'required_if:transaction_type,daily_visit_fee',
             'description' => 'required_if:transaction_type,daily_visit_fee',
             'payment_method' => 'required',
         ], [
@@ -325,6 +342,7 @@ class KelolaPendapatan extends Component
             'duration_membership.required_if' => 'Pilih durasi membership.',
             'selectedProducts.required_if' => 'Pilih setidaknya satu produk untuk dijual.',
             'description.required_if' => 'Deskripsi diperlukan untuk transaksi ini.',
+            'visitor_type.required_if' => 'Pilih tipe pengunjung.',
             'payment_method.required' => 'Metode pembayaran tidak boleh kosong.',
         ]);
 
@@ -334,6 +352,7 @@ class KelolaPendapatan extends Component
             $totalAmount = 0;
             $userId = null;
             $description = '';
+            $visitorType = null;
 
             //  Fix assignment untuk user_id
             if ($this->transaction_type === 'membership_payment') {
@@ -343,6 +362,7 @@ class KelolaPendapatan extends Component
                 $description = 'Pembayaran membership - ' . $this->member_type . ' - ' . $memberName;
             } elseif ($this->transaction_type === 'daily_visit_fee') {
                 $totalAmount = $this->dailyVisitTotal;
+                $visitorType = $this->visitor_type;
                 $description = $this->description;
             } elseif ($this->transaction_type === 'additional_items_sale') {
                 $totalAmount = $this->totalAmount;
@@ -361,6 +381,7 @@ class KelolaPendapatan extends Component
                 'total_amount' => $totalAmount,
                 'user_id' => $userId,
                 'payment_method' => $this->payment_method,
+                'visitor_type' => $visitorType,
             ]);
 
             //Handle transaction items
@@ -455,7 +476,8 @@ class KelolaPendapatan extends Component
             'selectedProducts',
             'totalAmount',
             'membershipTotal',
-            'selectedMemberData'
+            'selectedMemberData',
+            'visitor_type'
         ]);
 
         // Reload options
