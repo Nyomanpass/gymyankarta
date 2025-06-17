@@ -6,17 +6,37 @@
     <title>GYMTANKARTA</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
+
+ 
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        #qr-reader video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 8px;
+        }
+        
+        #qr-reader canvas {
+            display: none !important;
+        }
+        
+        #qr-reader {
+            position: relative;
+            overflow: hidden;
+        }
+    </style>
     
 </head>
 <body class="bg-gray-100 font-poppins text-warna-300 overflow-x-hidden">
     <div class="min-h-screen bg-gray-100">
-        <nav class="fixed top-0 left-0 right-0 z-40 h-16 bg-warna-50 boreder-b border-warna-100 shadow-sm">
+        <nav class="hidden lg:block fixed top-0 left-0 right-0 z-40 h-16 bg-warna-50 boreder-b border-warna-100 shadow-sm">
             <div class="h-16 px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16">
                     <!-- Logo -->
                     <div class="flex items-center flex-shrink-0">
                         <img src="/logo.png" alt="Logo" class="h-10 w-10 mr-3">
-                        <a href="{{ route('dashboard') }}" class="hidden md:block text-xl font-bold text-warna-300 hover:text-warna-400 transition-colors">
+                        <a class="hidden md:block text-xl font-bold text-warna-300 hover:text-warna-400 transition-colors">
                             GYMYANKARTA
                         </a>    
                     </div>
@@ -105,7 +125,7 @@
                                         class=" w-full disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
                                         />
                                     </div>
-                                    <button wire:click="" class="mt-10 w-full bg-warna-400 hover:bg-warna-400/80 text-white font-semibold py-2 px-4 rounded-lg transition-all active:scale-95">
+                                    <button wire:click="testPing" class="mt-10 w-full bg-warna-400 hover:bg-warna-400/80 text-white font-semibold py-2 px-4 rounded-lg transition-all active:scale-95">
                                         Edit Profil
                                     </button>
                                     <button wire:click="" class="mt-5 w-full bg-white border border-warna-400 hover:bg-warna-400 text-warna-400 hover:text-white font-semibold py-2 px-4 rounded-lg transition-all active:scale-95">
@@ -136,11 +156,6 @@
                                 <div>{{ Auth::user()->name }}</div>
                                 <div class="text-warna-200/80">{{ Auth::user()->email }}</div>
                             </div>
-                            <ul class="py-2 text-sm text-gray-700 dark:text-gray-200">
-                                <li>
-                                    <a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Settings</a>
-                                </li>
-                            </ul>
                             <div class="py-1">
                                 <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Log out</a>
                             </div>
@@ -150,7 +165,7 @@
             </div>
         </nav>
 
-        <main class="pt-16 px-4 sm:px-6 lg:px-8">
+        <main class="pt-10 lg:pt-16 px-4 sm:px-6 lg:px-8">
             <div class="">
                 {{ $slot }}
             </div>

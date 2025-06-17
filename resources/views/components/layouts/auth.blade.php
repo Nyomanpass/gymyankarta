@@ -8,8 +8,8 @@
     @livewireStyles
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="font-roboto text-warna-300 ">
-    <main>{{ $slot }}</main>
-      @livewireScripts
+<body class="font-poppins text-warna-300 h-[100dvh] lg:min-h-screen flex items-center justify-center">
+    {{ $slot }}
+    @livewireScripts
 </body>
 </html>

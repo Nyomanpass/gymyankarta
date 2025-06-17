@@ -6,7 +6,6 @@
 
         <title>Laravel</title>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
-        @vite([])
 
         <link rel="icon" href="/favicon.ico" sizes="any">
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">

@@ -35,7 +35,7 @@
 
     <!-- Actions Section -->
     @isset($actions)
-        <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="mt-6 pt-4 border-t border-gray-200 w-full flex justify-end">
             {{ $actions }}
         </div>
     @endisset

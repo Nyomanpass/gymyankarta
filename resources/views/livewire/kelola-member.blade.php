@@ -815,8 +815,7 @@
                 </div>
 
                 <!-- Footer Actions -->
-                <x-slot name="actions">
-                    <div class="flex items-center justify-end w-full space-x-3">
+                <x-slot name="actions" >
                         <button type="button" @click="show = false; setTimeout(() => $wire.closeEditModal(), 200)" 
                                 class="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200">
                             Batal
@@ -825,7 +824,6 @@
                                 class="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105">
                             <i class="fas fa-save mr-2"></i>Simpan Perubahan
                         </button>
-                    </div>
                 </x-slot>
             </x-input-modal>
         </div>
