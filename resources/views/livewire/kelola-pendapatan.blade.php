@@ -406,7 +406,7 @@
                 <div class="flex items-center gap-2">
                     <label class="text-sm text-gray-600">Show:</label>
                     <select wire:model.live="perPage" 
-                            class="text-sm border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-warna-400 focus:border-warna-400">
+                            class="text-sm border w-16 border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-warna-400 focus:border-warna-400">
                         <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="15">15</option>
