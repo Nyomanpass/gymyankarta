@@ -23,14 +23,77 @@
                         type="number"
                         id="harga_pengunjung_harian"
                         wire:model.live="harga_pengunjung_harian"
-                        label="Harga Pengunjung Harian"
+                        label="Harga Pengunjung Harian (Local)"
                         class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="0"
                     />
+                </div>
+            </div>
 
+            <div>
+                <div class="relative">
+                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                    <x-g-input 
+                        type="number"
+                        id="harga_pengunjung_harian_foreign"
+                        wire:model.live="harga_pengunjung_harian_foreign"
+                        label="Harga Pengunjung Harian (Foreign)"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                    />
                 </div>
             </div>
             
+        </div>
+
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-6">Harga Membership Foreign</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="relative">
+                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                    <x-g-input 
+                        type="number"
+                        id="foreign_1_week"
+                        wire:model.live="foreign_1_week"
+                        label="1 Minggu"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                    />
+                </div>
+                <div class="relative">
+                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                    <x-g-input 
+                        type="number"
+                        id="foreign_2_weeks"
+                        wire:model.live="foreign_2_weeks"
+                        label="2 Minggu"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                    />
+                </div>
+                <div class="relative">
+                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                    <x-g-input 
+                        type="number"
+                        id="foreign_3_weeks"
+                        wire:model.live="foreign_3_weeks"
+                        label="3 Minggu"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                    />
+                </div>
+                <div class="relative">
+                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
+                    <x-g-input 
+                        type="number"
+                        id="foreign_1_month"
+                        wire:model.live="foreign_1_month"
+                        label="1 Bulan"
+                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0"
+                    />
+                </div>
+            </div>
         </div>
 
         <div class="mt-6 flex justify-end">
@@ -39,9 +102,15 @@
                 wire:loading.attr="disabled"
                 wire:loading.class="opacity-50 cursor-not-allowed"
                 wire:target="saveSettings"
-                {{ ($harga_membership_per_bulan == $original_harga_membership_per_bulan && $harga_pengunjung_harian == $original_harga_pengunjung_harian) ? 'disabled' : '' }}
+                {{ ($harga_membership_per_bulan == $original_harga_membership_per_bulan && 
+                    $harga_pengunjung_harian == $original_harga_pengunjung_harian && 
+                    $harga_pengunjung_harian_foreign == $original_harga_pengunjung_harian_foreign && 
+                    $foreign_1_week == $original_foreign_1_week && 
+                    $foreign_2_weeks == $original_foreign_2_weeks && 
+                    $foreign_3_weeks == $original_foreign_3_weeks && 
+                    $foreign_1_month == $original_foreign_1_month) ? 'disabled' : '' }}
                 class="w-full md:w-max bg-warna-700 hover:bg-warna-700/80 text-white font-medium py-3 px-6 rounded-lg transition duration-200 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
-                   
+                
                 <span wire:loading.remove wire:target="saveSettings">Simpan Pengaturan</span>
                 <span wire:loading wire:target="saveSettings">
                     <i class="fas fa-spinner fa-spin mr-2"></i>

@@ -16,11 +16,13 @@ class Transaction extends Model
         'total_amount',
         'user_id',
         'payment_method',
+        'visitor_type',
     ];
 
     protected $casts = [
         'transaction_datetime' => 'datetime',
         'total_amount' => 'decimal:2',
+        'visitor_type' => 'string',
     ];
 
     // Relasi
