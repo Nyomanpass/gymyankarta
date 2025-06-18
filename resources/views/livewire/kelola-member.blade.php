@@ -442,63 +442,99 @@
                     <x-slot name="title">Detail Member</x-slot>
                     <x-slot name="subtitle">Berikut adalah detail informasi member.</x-slot>
                     
-                    <div class="max-h-[60vh] overflow-y-auto py-2 mt-6">
-                        <!-- Informasi Member -->
-                        <div class="mb-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="md:text-lg font-semibold text-gray-800">Informasi Member</h3>
-                                <div class="flex items-center gap-2">
-                                    <!-- Status Dropdown dengan semua status -->
-                                    <div class="relative" x-data="{ open: false }">
+                    <div class="max-h-[45vh] overflow-y-auto py-4 mt-6">
+                        <!-- Header Section with Member Info -->
+                        <div class="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-blue-100 hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex flex-col lg:flex-row lg:justify-between gap-4">
+                                <div class="flex items-center gap-3 sm:gap-4">
+                                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-warna-400 rounded-full flex items-center justify-center flex-shrink-0">
+                                        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ $memberDetail['name'] }}</h3>
+                                        <p class="text-gray-600 text-sm truncate">{{ $memberDetail['email'] }}</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                                {{ $memberDetail['member_type'] === 'local' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800' }}">
+                                                <i class="fas {{ $memberDetail['member_type'] === 'local' ? 'fa-home' : 'fa-globe' }} mr-1"></i>
+                                                {{ ucfirst($memberDetail['member_type']) }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                    <!-- Status Dropdown -->
+                                    <div class="relative flex-1 sm:flex-none" x-data="{ open: false }">
                                         <button @click="open = !open" 
-                                                class="flex items-center px-3 py-1 text-xs rounded-full border
-                                                {{ $memberDetail['status'] === 'active' ? 'bg-green-100 text-green-800 border-green-200' : 
-                                                ($memberDetail['status'] === 'frozen' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' : 
-                                                ($memberDetail['status'] === 'inactive' ? 'bg-red-100 text-red-800 border-red-200' :
-                                                ($memberDetail['status'] === 'pending_email_verification' ? 'bg-orange-100 text-orange-800 border-orange-200' : 'bg-purple-100 text-purple-800 border-purple-200'))) }}
-                                                hover:opacity-80 transition-opacity">
-                                            {{ str_replace('_', ' ', ucfirst($memberDetail['status'])) }}
-                                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                                                class="w-full sm:w-auto flex items-center justify-center px-3 sm:px-4 py-2 text-sm font-medium rounded-lg border-2 transition-all duration-200 hover:scale-105
+                                                {{ $memberDetail['status'] === 'active' ? 'bg-green-100 text-green-800 border-green-200 hover:bg-green-200' : 
+                                                ($memberDetail['status'] === 'frozen' ? 'bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200' : 
+                                                ($memberDetail['status'] === 'inactive' ? 'bg-red-100 text-red-800 border-red-200 hover:bg-red-200' :
+                                                ($memberDetail['status'] === 'pending_email_verification' ? 'bg-orange-100 text-orange-800 border-orange-200 hover:bg-orange-200' : 'bg-purple-100 text-purple-800 border-purple-200 hover:bg-purple-200'))) }}">
+                                            <div class="w-2 h-2 rounded-full mr-2 flex-shrink-0
+                                                {{ $memberDetail['status'] === 'active' ? 'bg-green-500' : 
+                                                ($memberDetail['status'] === 'frozen' ? 'bg-yellow-500' : 
+                                                ($memberDetail['status'] === 'inactive' ? 'bg-red-500' :
+                                                ($memberDetail['status'] === 'pending_email_verification' ? 'bg-orange-500' : 'bg-purple-500'))) }}">
+                                            </div>
+                                            <span class="truncate">{{ str_replace('_', ' ', ucfirst($memberDetail['status'])) }}</span>
+                                            <i class="fas fa-chevron-down ml-2 text-xs flex-shrink-0"></i>
                                         </button>
                                         
                                         <div x-show="open" @click.away="open = false" 
-                                            x-transition:enter="transition ease-out duration-100"
+                                            x-transition:enter="transition ease-out duration-200"
                                             x-transition:enter-start="transform opacity-0 scale-95"
                                             x-transition:enter-end="transform opacity-100 scale-100"
-                                            x-transition:leave="transition ease-in duration-75"
+                                            x-transition:leave="transition ease-in duration-150"
                                             x-transition:leave-start="transform opacity-100 scale-100"
                                             x-transition:leave-end="transform opacity-0 scale-95"
-                                            class="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                                            <div class="py-1">
+                                            class="absolute left-0 sm:right-0 mt-2 w-full sm:w-64 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                                            <div class="py-2">
                                                 <button wire:click="changeStatus('active')" 
                                                         @click="open = false"
-                                                        class="flex items-center w-full px-3 py-2 text-xs text-green-700 hover:bg-green-50 transition-colors">
-                                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                                                    Active
+                                                        class="flex items-center w-full px-4 py-3 text-sm text-green-700 hover:bg-green-50 transition-colors">
+                                                    <div class="w-3 h-3 bg-green-500 rounded-full mr-3 flex-shrink-0"></div>
+                                                    <div>
+                                                        <div class="font-medium">Active</div>
+                                                        <div class="text-xs text-gray-500">Member dapat menggunakan fasilitas</div>
+                                                    </div>
                                                 </button>
                                                 <button wire:click="changeStatus('frozen')" 
                                                         @click="open = false"
-                                                        class="flex items-center w-full px-3 py-2 text-xs text-yellow-700 hover:bg-yellow-50 transition-colors">
-                                                    <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-                                                    Frozen
+                                                        class="flex items-center w-full px-4 py-3 text-sm text-yellow-700 hover:bg-yellow-50 transition-colors">
+                                                    <div class="w-3 h-3 bg-yellow-500 rounded-full mr-3 flex-shrink-0"></div>
+                                                    <div>
+                                                        <div class="font-medium">Frozen</div>
+                                                        <div class="text-xs text-gray-500">Membership dibekukan sementara</div>
+                                                    </div>
                                                 </button>
                                                 <button wire:click="changeStatus('inactive')" 
                                                         @click="open = false"
-                                                        class="flex items-center w-full px-3 py-2 text-xs text-red-700 hover:bg-red-50 transition-colors">
-                                                    <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                                                    Inactive
+                                                        class="flex items-center w-full px-4 py-3 text-sm text-red-700 hover:bg-red-50 transition-colors">
+                                                    <div class="w-3 h-3 bg-red-500 rounded-full mr-3 flex-shrink-0"></div>
+                                                    <div>
+                                                        <div class="font-medium">Inactive</div>
+                                                        <div class="text-xs text-gray-500">Member tidak aktif</div>
+                                                    </div>
                                                 </button>
                                                 <button wire:click="changeStatus('pending_email_verification')" 
                                                         @click="open = false"
-                                                        class="flex items-center w-full px-3 py-2 text-xs text-orange-700 hover:bg-orange-50 transition-colors">
-                                                    <div class="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
-                                                    Pending Email
+                                                        class="flex items-center w-full px-4 py-3 text-sm text-orange-700 hover:bg-orange-50 transition-colors">
+                                                    <div class="w-3 h-3 bg-orange-500 rounded-full mr-3 flex-shrink-0"></div>
+                                                    <div>
+                                                        <div class="font-medium">Pending Email</div>
+                                                        <div class="text-xs text-gray-500">Menunggu verifikasi email</div>
+                                                    </div>
                                                 </button>
                                                 <button wire:click="changeStatus('pending_admin_verification')" 
                                                         @click="open = false"
-                                                        class="flex items-center w-full px-3 py-2 text-xs text-purple-700 hover:bg-purple-50 transition-colors">
-                                                    <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                                                    Pending Admin
+                                                        class="flex items-center w-full px-4 py-3 text-sm text-purple-700 hover:bg-purple-50 transition-colors">
+                                                    <div class="w-3 h-3 bg-purple-500 rounded-full mr-3 flex-shrink-0"></div>
+                                                    <div>
+                                                        <div class="font-medium">Pending Admin</div>
+                                                        <div class="text-xs text-gray-500">Menunggu verifikasi admin</div>
+                                                    </div>
                                                 </button>
                                             </div>
                                         </div>
@@ -506,57 +542,80 @@
                                     
                                     <!-- Edit Button -->
                                     <button wire:click="openEditMemberModal" 
-                                            class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors">
-                                        <i class="fas fa-edit mr-1"></i>Edit
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Edit</span>
                                     </button>
                                 </div>
                             </div>
-                            
-                            <!-- Member details grid tetap sama -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Nama:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail['name'] }}</span>
-                                </div>
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Email:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail['email'] }}</span>
-                                </div>
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Username:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail['username'] }}</span>
-                                </div>
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Nomor Telepon:</strong> 
-                                    <span class="text-gray-900">{{ $memberDetail['nomor_telepon'] }}</span>
-                                </div>
-                                <div class="mb-1.5">
-                                    <strong class="text-gray-600">Jenis Member:</strong> 
-                                    <span class="text-gray-900">{{ ucfirst($memberDetail['member_type']) }}</span>
-                                </div>
-                                @if($memberDetail['membership_expiration_date'])
-                                    <div class="mb-1.5">
-                                        <strong class="text-gray-600">Tanggal Expired:</strong> 
-                                        <span class="text-gray-900">{{ \Carbon\Carbon::parse($memberDetail['membership_expiration_date'])->format('d/m/Y') }}</span>
+                        </div>
+
+                        <!-- Member Details Cards -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6">
+                            <!-- Personal Information Card -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-user-circle mr-3 text-blue-600"></i>
+                                    Informasi Pribadi
+                                </h4>
+                                <div class="space-y-3">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium text-sm sm:text-base">Username:</span>
+                                        <span class="text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded text-sm mt-1 sm:mt-0 break-all">{{ $memberDetail['username'] }}</span>
                                     </div>
-                                @endif
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2 border-b border-gray-100">
+                                        <span class="text-gray-600 font-medium text-sm sm:text-base">Telepon:</span>
+                                        <span class="text-gray-900 text-sm sm:text-base mt-1 sm:mt-0">{{ $memberDetail['nomor_telepon'] }}</span>
+                                    </div>
+                                    @if($memberDetail['membership_expiration_date'])
+                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between py-2">
+                                            <span class="text-gray-600 font-medium text-sm sm:text-base">Expired:</span>
+                                            <span class="text-gray-900 font-semibold text-sm sm:text-base mt-1 sm:mt-0
+                                                {{ \Carbon\Carbon::parse($memberDetail['membership_expiration_date'])->isPast() ? 'text-red-600' : 'text-green-600' }}">
+                                                {{ \Carbon\Carbon::parse($memberDetail['membership_expiration_date'])->format('d/m/Y') }}
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Quick Stats Card -->
+                            <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                                    <i class="fas fa-chart-line mr-3 text-green-600"></i>
+                                    Statistik Cepat
+                                </h4>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                        <div class="text-xl sm:text-2xl font-bold text-blue-600">{{ $attendanceStats['attendedDays'] }}</div>
+                                        <div class="text-xs text-gray-600">Hari Hadir</div>
+                                    </div>
+                                    <div class="text-center p-3 bg-purple-50 rounded-lg">
+                                        <div class="text-xl sm:text-2xl font-bold text-purple-600">{{ $attendanceStats['attendancePercentage'] }}%</div>
+                                        <div class="text-xs text-gray-600">Kehadiran</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Kalender Absensi -->
-                        <div class="border-t border-warna-100 pt-6">
-                            <h3 class="md:text-lg font-semibold mb-4 text-gray-800">Kalender Absensi Member</h3>
-                            
-                            <div class="flex gap-4 mb-6 px-2">
-                                <div class="flex-1">
-                                    <select wire:model.live="selectedMonth" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <!-- Attendance Calendar Section -->
+                        <div class="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                <h4 class="text-lg font-semibold text-gray-900 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-3 text-indigo-600"></i>
+                                    Kalender Absensi
+                                </h4>
+                                
+                                <!-- Month/Year Selectors -->
+                                <div class="flex gap-2 sm:gap-3">
+                                    <select wire:model.live="selectedMonth" 
+                                            class="flex-1 sm:flex-none px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white">
                                         @foreach($monthOptions as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
                                     </select>
-                                </div>
-                                <div class="flex-1">
-                                    <select wire:model.live="selectedYear" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <select wire:model.live="selectedYear" 
+                                            class="flex-1 sm:flex-none px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white">
                                         @foreach($yearOptions as $value => $label)
                                             <option value="{{ $value }}">{{ $label }}</option>
                                         @endforeach
@@ -564,37 +623,36 @@
                                 </div>
                             </div>
 
-                            <!-- Header Hari -->
-                            <div class="grid grid-cols-7 gap-1 mb-2">
-                                @foreach(['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $day)
-                                    <div class="text-center text-sm font-medium text-gray-500 py-2">
-                                        {{ $day }}
+                            <!-- Calendar Header -->
+                            <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-3">
+                                @foreach(['S', 'S', 'R', 'K', 'J', 'S', 'M'] as $index => $day)
+                                    <div class="text-center text-xs sm:text-sm font-semibold text-gray-700 py-2 bg-gray-50 rounded-lg">
+                                        <span class="block sm:hidden">{{ $day }}</span>
+                                        <span class="hidden sm:block">{{ ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'][$index] }}</span>
                                     </div>
                                 @endforeach
                             </div>
 
-                            <!-- Kalender Grid -->
-                            <div class="grid grid-cols-7 gap-1">
+                            <!-- Calendar Grid -->
+                            <div class="grid grid-cols-7 gap-1 sm:gap-2 mb-6">
                                 @foreach($calendarDays as $day)
-                                    <div class="relative h-10 flex items-center justify-center text-sm border border-gray-200 rounded
-                                        {{ !$day['isCurrentMonth'] ? 'bg-gray-50 text-gray-400' : 'bg-white' }}
-                                        {{ $day['isToday'] ? 'ring-2 ring-blue-500' : '' }}
-                                        {{ $day['isAttended'] ? 'bg-green-100' : '' }}
+                                    <div class="relative h-10 sm:h-12 flex items-center justify-center text-xs sm:text-sm rounded-lg border transition-all duration-200 hover:scale-105
+                                        {{ !$day['isCurrentMonth'] ? 'bg-gray-50 text-gray-400 border-gray-200' : 'bg-white border-gray-300' }}
+                                        {{ $day['isToday'] ? 'ring-2 ring-blue-500 bg-blue-50' : '' }}
+                                        {{ $day['isAttended'] ? 'bg-green-100 border-green-300 shadow-sm' : '' }}
                                         {{ $day['isMembershipActive'] && !$day['isAttended'] ? 'bg-blue-50 border-blue-200' : '' }}">
                                         
-                                        <!-- Nomor Tanggal -->
-                                        <span class="
-                                            {{ $day['isAttended'] ? 'text-green-800 font-semibold' : '' }}
-                                            {{ $day['isMembershipActive'] && !$day['isAttended'] ? 'text-blue-400' : '' }}
+                                        <span class="font-medium
+                                            {{ $day['isAttended'] ? 'text-green-800' : '' }}
+                                            {{ $day['isMembershipActive'] && !$day['isAttended'] ? 'text-blue-600' : '' }}
                                             {{ !$day['isMembershipActive'] && $day['isCurrentMonth'] ? 'text-gray-700' : '' }}
                                             {{ !$day['isCurrentMonth'] ? 'text-gray-400' : '' }}">
                                             {{ $day['day'] }}
                                         </span>
                                         
-                                        <!-- Icon Centang untuk hari hadir -->
                                         @if($day['isAttended'])
-                                            <div class="absolute top-0 right-0 -mt-1 -mr-1">
-                                                <div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                                            <div class="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1">
+                                                <div class="w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center shadow-sm">
                                                     <i class="fas fa-check text-white text-xs"></i>
                                                 </div>
                                             </div>
@@ -603,76 +661,85 @@
                                 @endforeach
                             </div>
 
-                            <!-- Keterangan -->
-                            <div class="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                            <!-- Legend -->
+                            <div class="grid grid-cols-2 lg:flex lg:flex-wrap items-center gap-3 lg:gap-6 p-3 sm:p-4 bg-gray-50 rounded-lg text-xs sm:text-sm">
                                 <div class="flex items-center gap-2">
-                                    <div class="w-4 h-4 bg-green-100 border border-green-200 rounded flex items-center justify-center">
+                                    <div class="w-4 h-4 sm:w-5 sm:h-5 bg-green-100 border-2 border-green-300 rounded-lg flex items-center justify-center flex-shrink-0">
                                         <i class="fas fa-check text-green-600 text-xs"></i>
                                     </div>
-                                    <span class="text-gray-600">Hadir</span>
+                                    <span class="text-gray-700 font-medium">Hadir</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-4 h-4 bg-blue-50 border border-blue-200 rounded flex items-center justify-center text-blue-400 text-xs font-semibold">
-                                        1
+                                    <div class="w-4 h-4 sm:w-5 sm:h-5 bg-blue-50 border-2 border-blue-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <span class="text-blue-600 text-xs font-bold">A</span>
                                     </div>
-                                    <span class="text-gray-600">Membership Aktif</span>
+                                    <span class="text-gray-700 font-medium">Aktif</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-4 h-4 bg-white border border-gray-200 rounded flex items-center justify-center text-gray-700 text-xs">
-                                        1
-                                    </div>
-                                    <span class="text-gray-600">Membership Tidak Aktif</span>
+                                    <div class="w-4 h-4 sm:w-5 sm:h-5 bg-white border-2 border-gray-300 rounded-lg flex-shrink-0"></div>
+                                    <span class="text-gray-700 font-medium">Tidak Aktif</span>
                                 </div>
                                 <div class="flex items-center gap-2">
-                                    <div class="w-4 h-4 bg-white border-2 border-blue-500 rounded"></div>
-                                    <span class="text-gray-600">Hari Ini</span>
+                                    <div class="w-4 h-4 sm:w-5 sm:h-5 bg-blue-50 border-2 border-blue-500 rounded-lg flex-shrink-0"></div>
+                                    <span class="text-gray-700 font-medium">Hari Ini</span>
                                 </div>
                             </div>
 
-                            <!-- Statistik Absensi -->
-                            <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-                                <h4 class="font-semibold text-gray-800 mb-2">Statistik Bulan {{ $attendanceStats['monthName'] }} {{ $attendanceStats['year'] }}</h4>
-                                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-                                    <div>
-                                        <div class="text-2xl font-bold text-green-600">{{ $attendanceStats['attendedDays'] }}</div>
-                                        <div class="text-sm text-gray-600">Hari Hadir</div>
+                            <!-- Monthly Statistics -->
+                            <div class="mt-6 p-3 sm:p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl">
+                                <h5 class="font-semibold text-gray-800 mb-4 text-center text-sm sm:text-base">
+                                    Statistik {{ $attendanceStats['monthName'] }} {{ $attendanceStats['year'] }}
+                                </h5>
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                                    <div class="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
+                                        <div class="text-lg sm:text-2xl font-bold text-green-600">{{ $attendanceStats['attendedDays'] }}</div>
+                                        <div class="text-xs text-gray-600 mt-1">Hari Hadir</div>
                                     </div>
-                                    <div>
-                                        <div class="text-2xl font-bold text-blue-600">{{ $attendanceStats['membershipActiveDays'] }}</div>
-                                        <div class="text-sm text-gray-600">Hari Membership</div>
+                                    <div class="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
+                                        <div class="text-lg sm:text-2xl font-bold text-blue-600">{{ $attendanceStats['membershipActiveDays'] }}</div>
+                                        <div class="text-xs text-gray-600 mt-1">Hari Aktif</div>
                                     </div>
-                                    <div>
-                                        <div class="text-2xl font-bold text-gray-600">{{ $attendanceStats['notAttendedDays'] }}</div>
-                                        <div class="text-sm text-gray-600">Tidak Hadir</div>
+                                    <div class="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
+                                        <div class="text-lg sm:text-2xl font-bold text-red-600">{{ $attendanceStats['notAttendedDays'] }}</div>
+                                        <div class="text-xs text-gray-600 mt-1">Tidak Hadir</div>
                                     </div>
-                                    <div>
-                                        <div class="text-2xl font-bold text-purple-600">{{ $attendanceStats['attendancePercentage'] }}%</div>
-                                        <div class="text-sm text-gray-600">Tingkat Kehadiran</div>
+                                    <div class="text-center p-2 sm:p-3 bg-white rounded-lg shadow-sm">
+                                        <div class="text-lg sm:text-2xl font-bold text-purple-600">{{ $attendanceStats['attendancePercentage'] }}%</div>
+                                        <div class="text-xs text-gray-600 mt-1">Persentase</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="flex justify-between items-center mt-8 md:mt-9">
-                        <button  
-                            class="px-5 py-2 bg-warna-900 hover:bg-warna-900/80 active:scale-95 transition-all text-white rounded-lg mr-2"  
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mt-8 pt-6 border-t border-gray-200">
+
+                        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <button  
+                            class="order-2 sm:order-1 px-4 py-2 bg-warna-900 hover:bg-warna-900/80 text-white rounded-lg transition-all duration-200 hover:scale-105 flex items-center gap-2 text-sm"  
                             wire:click="openHapusMemberModal"
                             data-tooltip-target="tooltip-delete-member"
                             data-tooltip-placement="top"
-                        >
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                        <div id="tooltip-delete-member" role="tooltip" class="absolute z-70 invisible inline-block px-3 py-2 text-xs font-medium text-white transition-opacity duration-300 bg-gray-900 rounded-lg shadow-sm opacity-0 tooltip dark:bg-gray-700">
-                            Hapus Member
-                            <div class="tooltip-arrow" data-popper-arrow></div>
+                            >
+                                <i class="fas fa-trash"></i>
+                                <span>Hapus Akun</span>
+                            </button>
+
+                            <button wire:click="testAbsen" 
+                            class="w-full sm:w-auto px-4 py-2 bg-warna-700 hover:bg-warna-700/80 text-white rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2 text-sm">
+                                <i class="fas fa-pen"></i>
+                                <span>Absen Manual</span>
+                            </button>
                         </div>
 
-                        <!-- testing only. HAPUS KALO UDAH MASUK PRODUCTION -->
-                        <button wire:click="testAbsen" class="text-xs bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
-                            TES ABSEN
-                        </button>
-                        
-                        <button @click="show = false"  type="button" wire:click="closeInputModal()" class="px-5 lg:px-7 py-2 bg-gray-300 hover:bg-gray-300/80 active:scale-95 transition-all text-gray-700 rounded-lg mr-2">Tutup</button>
+                        <div class="mt-3 lg:mt-0 order-1 sm:order-2 flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                            <button @click="show = false" type="button" wire:click="closeInputModal()" 
+                                    class="w-full sm:w-auto px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-700 rounded-lg transition-all duration-200 hover:scale-105 flex items-center justify-center gap-2">
+                                <i class="fas fa-times"></i>
+                                <span>Tutup</span>
+                            </button>
+                        </div>
                     </div>
                 @endif
             </x-input-modal>
@@ -774,7 +841,8 @@
                                             'pending_email_verification' => 'Pending Email Verification',
                                             'pending_admin_verification' => 'Pending Admin Verification'
                                         ]"
-                                        class="transition-all duration-200 focus:scale-105"
+                                        disabled
+                                        class="transition-all duration-200 focus:scale-105 disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500"
                                     />
                                 </div>
                             </div>
@@ -821,7 +889,7 @@
                             Batal
                         </button>
                         <button wire:click="updateMember" 
-                                class="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 hover:scale-105">
+                                class="flex items-center px-6 py-2 bg-warna-700 hover:bg-warna-700/80 text-white rounded-lg transition-all duration-200 hover:scale-105 ml-3">
                             <i class="fas fa-save mr-2"></i>Simpan Perubahan
                         </button>
                 </x-slot>

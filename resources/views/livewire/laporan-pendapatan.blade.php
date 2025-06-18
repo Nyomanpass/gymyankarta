@@ -126,7 +126,7 @@
                         @forelse($this->todayTransactions ?? [] as $transaction)
                             <tr class="hover:bg-gray-50 transition-colors">
                                 <td class="px-4 py-3 text-gray-900">
-                                    {{ $transaction->transaction_datetime->format('H:i') }}
+                                    {{ $transaction->transaction_datetime->format('d-m-Y H:i') }}
                                 </td>
                                 <td class="px-4 py-3">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
