@@ -123,7 +123,7 @@ class KelolaMember extends Component
 
     public function sortBy($field)
     {
-        if($this->sortField === $field){
+        if ($this->sortField === $field) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
         } else {
             $this->sortField = $field;
@@ -564,12 +564,21 @@ class KelolaMember extends Component
             return $day['isCurrentMonth'] && $day['isMembershipActive'];
         }));
 
+        // Hitung hari yang tidak melakukan absensi hanya sampai hari sebelum hari ini
+        $today = Carbon::now();
+        $notAttendedDays = count(array_filter($this->calendarDays, function ($day) use ($today) {
+            return $day['isCurrentMonth'] &&
+                $day['isMembershipActive'] &&
+                !$day['isAttended'] &&
+                $day['date']->lt($today); // hanya hitung sebelum hari ini
+        }));
+
         $attendancePercentage = $membershipActiveDays > 0 ? round(($attendedDays / $membershipActiveDays) * 100, 1) : 0;
 
         $this->attendanceStats = [
             'totalDaysInMonth' => $totalDaysInMonth,
             'attendedDays' => $attendedDays,
-            'notAttendedDays' => $membershipActiveDays - $attendedDays,
+            'notAttendedDays' => $notAttendedDays,
             'membershipActiveDays' => $membershipActiveDays,
             'attendancePercentage' => $attendancePercentage,
             'monthName' => $this->monthOptions[$this->selectedMonth],

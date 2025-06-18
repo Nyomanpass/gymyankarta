@@ -20,7 +20,7 @@ export default defineConfig({
             cert: fs.readFileSync("ssl/vite.crt"),
         },
         hmr: {
-            host: process.env.VITE_DEV_SERVER_HOST || "192.168.1.103",
+            host: process.env.VITE_DEV_SERVER_HOST || "192.168.110.234",
             protocol: "wss",
             port: 5173,
         },
