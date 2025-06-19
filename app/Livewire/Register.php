@@ -58,7 +58,6 @@ class Register extends Component
 
             DB::beginTransaction();
 
-            // Buat user dengan data lengkap
             $user = User::create([
                 'name' => $this->name,
                 'username' => $this->username,
@@ -71,7 +70,6 @@ class Register extends Component
 
             $token = Str::random(64);
 
-            // Insert token dengan data lengkap
             DB::table('email_verification_tokens')->insert([
                 'email' => $this->email,
                 'token' => $token,
@@ -80,35 +78,21 @@ class Register extends Component
                 'updated_at' => now(),
             ]);
 
-            // Log sebelum mengirim email
-            Log::info('Attempting to send email verification', [
-                'email' => $this->email,
-                'user_id' => $user->id
-            ]);
-
+            // Kirim email secara asynchronous menggunakan queue
             Mail::to($this->email)->send(new EmailVerification($user, $token));
-
-            // Log setelah mengirim email
-            Log::info('Email verification sent successfully', [
-                'email' => $this->email,
-                'user_id' => $user->id
-            ]);
 
             DB::commit();
 
-            session()->flash('success', 'Registrasi berhasil! Silakan cek email Anda untuk verifikasi.');
+            session()->flash('success', 'Registrasi berhasil! Email verifikasi sedang dikirim, silakan cek email Anda dalam beberapa menit.');
 
-            // Reset form
             $this->reset();
         } catch (\Exception $e) {
             DB::rollback();
-            Log::error('Failed to send email verification', [
+            Log::error('Registration failed', [
                 'email' => $this->email,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error' => $e->getMessage()
             ]);
             session()->flash('error', 'Terjadi kesalahan: ' . $e->getMessage());
-            return;
         }
     }
 }
