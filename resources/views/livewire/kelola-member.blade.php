@@ -447,8 +447,8 @@
                         <div class="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-blue-100 hover:shadow-lg transition-shadow duration-200">
                             <div class="flex flex-col lg:flex-row lg:justify-between gap-4">
                                 <div class="flex items-center gap-3 sm:gap-4">
-                                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-warna-400 rounded-full flex items-center justify-center flex-shrink-0">
-                                        {{ strtoupper(substr(Auth::user()->name, 0, 2)) }}
+                                    <div class="w-12 h-12 sm:w-16 sm:h-16 bg-warna-400 rounded-full flex items-center justify-center flex-shrink-0 font-semibold text-white">
+                                        {{ strtoupper(substr($memberDetail['name'], 0, 2)) }}
                                     </div>
                                     <div class="min-w-0 flex-1">
                                         <h3 class="text-lg sm:text-xl font-bold text-gray-900 truncate">{{ $memberDetail['name'] }}</h3>
