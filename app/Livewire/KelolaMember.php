@@ -412,6 +412,17 @@ class KelolaMember extends Component
             'membership_expiration_date' => now()->addMonth(),
         ]);
 
+        // Create transaction for new member
+        $transaction = \App\Models\Transaction::create([
+            'user_id' => $member->id,
+            'transaction_datetime' => now(),
+            'transaction_type' => 'membership_payment',
+            'description' => 'Manual pembayaran membership atas nama ' . $member->name,
+            'total_amount' => \App\Models\Setting::where('key', 'base_monthly_membership_fee')->value('value') ?? 120000,
+            'payment_method' => 'cash',
+
+        ]);
+
         session()->flash('message', [
             'type' => 'success',
             'title' => 'Tambah Data Berhasil',
