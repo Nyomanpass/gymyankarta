@@ -487,7 +487,6 @@
     </div>
 
     <div class="space-y-4">
-      <!-- FAQ 1 -->
       <div id="faq1" class="group cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 md:p-6 transition-all duration-300">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-base md:text-lg text-gray-800 pr-4">Apa saja fasilitas yang tersedia di Gym Yankarta?</h3>
@@ -496,11 +495,10 @@
           </div>
         </div>
         <p id="answer1" class="mt-4 text-sm md:text-base text-gray-600 leading-relaxed hidden">
-          Kami menyediakan alat gym lengkap untuk latihan beban dan kardio dari brand ternama, loker penyimpanan yang aman, ruangan ber-AC, dan area istirahat yang nyaman.
+          Kami menyediakan alat gym lengkap untuk latihan beban dan kardio dari brand ternama, loker penyimpanan yang aman, dan area istirahat yang nyaman.
         </p>
       </div>
 
-      <!-- FAQ 2 -->
       <div id="faq2" class="group cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 md:p-6 transition-all duration-300">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-base md:text-lg text-gray-800 pr-4">Apakah bisa bayar harian tanpa jadi member?</h3>
@@ -513,7 +511,6 @@
         </p>
       </div>
 
-      <!-- FAQ 3 -->
       <div id="faq3" class="group cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 md:p-6 transition-all duration-300">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-base md:text-lg text-gray-800 pr-4">Apakah pemula boleh latihan di Gym Yankarta?</h3>
@@ -526,7 +523,6 @@
         </p>
       </div>
 
-      <!-- FAQ 4 -->
       <div id="faq4" class="group cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 md:p-6 transition-all duration-300">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-base md:text-lg text-gray-800 pr-4">Jam operasional Gym Yankarta?</h3>
@@ -539,7 +535,6 @@
         </p>
       </div>
 
-      <!-- FAQ 5 -->
       <div id="faq5" class="group cursor-pointer bg-gray-50 hover:bg-gray-100 rounded-2xl p-4 md:p-6 transition-all duration-300">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold text-base md:text-lg text-gray-800 pr-4">Bagaimana cara mendaftar menjadi member?</h3>
@@ -555,11 +550,8 @@
   </div>
 </section>
 
-
     
     
-    
-      
       <!-- Contact Section -->
       <section id="contact" class="py-16 md:py-24 bg-gradient-to-br from-gray-900 via-warna-300 to-warna-400 relative overflow-hidden">
         <!-- Background Elements -->
@@ -675,11 +667,11 @@
                      class="w-10 h-10 bg-warna-400/20 hover:bg-warna-400 rounded-full flex items-center justify-center transition duration-300 group">
                     <i class="fab fa-whatsapp text-warna-400 group-hover:text-white"></i>
                   </a>
-                  <a href="#" class="w-10 h-10 bg-warna-400/20 hover:bg-warna-400 rounded-full flex items-center justify-center transition duration-300 group">
+                  <a href="https://www.instagram.com/yankartagym/" class="w-10 h-10 bg-warna-400/20 hover:bg-warna-400 rounded-full flex items-center justify-center transition duration-300 group" target="_blank">
                     <i class="fab fa-instagram text-warna-400 group-hover:text-white"></i>
                   </a>
-                  <a href="#" class="w-10 h-10 bg-warna-400/20 hover:bg-warna-400 rounded-full flex items-center justify-center transition duration-300 group">
-                    <i class="fab fa-facebook text-warna-400 group-hover:text-white"></i>
+                  <a href="https://www.tiktok.com/@yan.karta.gym" class="w-10 h-10 bg-warna-400/20 hover:bg-warna-400 rounded-full flex items-center justify-center transition duration-300 group" target="_blank" >
+                    <i class="fab fa-tiktok text-warna-400 group-hover:text-white"></i>
                   </a>
                 </div>
               </div>
@@ -776,81 +768,97 @@
         </div>
       </footer>
 
-      <script>
-        // JavaScript untuk mendeteksi scroll dan mengubah background header
-        window.addEventListener("scroll", function () {
-            const header = document.getElementById("header");
-            const mobileDropdown = document.getElementById("mobile-dropdown");
+<script>
+    // JavaScript untuk mendeteksi scroll dan mengubah background header
+    window.addEventListener("scroll", function () {
+        const header = document.getElementById("header");
+        const mobileDropdown = document.getElementById("mobile-dropdown");
 
-            const isDropdownVisible = !mobileDropdown.classList.contains("hidden"); // Cek apakah dropdown terbuka
-            if (window.scrollY > 50 || isDropdownVisible) {
-                // Jika scroll lebih dari 50px atau dropdown terbuka
-                header.classList.add("bg-warna-300", "shadow-lg");
-                header.classList.remove("bg-transparent");
-            } else {
-                header.classList.add("bg-transparent");
-                header.classList.remove("bg-warna-300", "shadow-lg");
-            }
-        });
+        const isDropdownVisible = !mobileDropdown.classList.contains("hidden"); // Cek apakah dropdown terbuka
+        if (window.scrollY > 50 || isDropdownVisible) {
+            // Jika scroll lebih dari 50px atau dropdown terbuka
+            header.classList.add("bg-warna-300", "shadow-lg");
+            header.classList.remove("bg-transparent");
+        } else {
+            header.classList.add("bg-transparent");
+            header.classList.remove("bg-warna-300", "shadow-lg");
+        }
+    });
 
+    // START FAQ ACCORDION LOGIC - VERSI DIPERBAIKI
+    const faqItems = document.querySelectorAll('[id^="faq"]'); // Memilih semua elemen FAQ
 
-        const faqItems = document.querySelectorAll('[id^="faq"]');
-
-        faqItems.forEach(item => {
-          item.addEventListener('click', () => {
+    faqItems.forEach(item => {
+        item.addEventListener('click', () => {
             const answerId = `answer${item.id.replace('faq', '')}`;
-            const answer = document.getElementById(answerId);
+            const currentAnswer = document.getElementById(answerId);
+            const chevronIcon = item.querySelector('.fa-chevron-down');
 
-            // Toggle the visibility of the answer
-            answer.classList.toggle('hidden');
-          });
+            // Cek apakah jawaban yang sedang diklik sudah terbuka
+            const isOpen = !currentAnswer.classList.contains('hidden');
+
+            // Tutup semua jawaban FAQ yang sedang terbuka (kecuali yang baru saja diklik jika mau dibuka)
+            faqItems.forEach(otherItem => {
+                const otherAnswerId = `answer${otherItem.id.replace('faq', '')}`;
+                const otherAnswer = document.getElementById(otherAnswerId);
+                const otherChevronIcon = otherItem.querySelector('.fa-chevron-down');
+
+                // Jika jawaban item lain terbuka, tutup mereka
+                if (otherAnswer && !otherAnswer.classList.contains('hidden')) { // Pastikan otherAnswer ada dan terbuka
+                    otherAnswer.classList.add('hidden'); // Sembunyikan jawaban
+                    otherChevronIcon.classList.remove('rotate-180'); // Putar ikon kembali
+                }
+            });
+
+            // Hanya jika item yang diklik sebelumnya tertutup, buka sekarang
+            // Jika sebelumnya sudah terbuka (dan sudah ditutup di loop di atas), biarkan tertutup
+            if (!isOpen) {
+                currentAnswer.classList.remove('hidden'); // Buka jawaban yang diklik
+                chevronIcon.classList.add('rotate-180'); // Putar ikon
+            }
+            // Jika `isOpen` adalah true, artinya diklik untuk menutupnya,
+            // maka class 'hidden' sudah ditambahkan dan rotate-180 sudah dihapus di loop atas.
+            // Tidak perlu tindakan tambahan di sini.
         });
+    });
+    // END FAQ ACCORDION LOGIC
 
-        // JavaScript to toggle the mobile dropdown menu
-        const mobileMenuButton = document.getElementById('mobile-menu');
-        const mobileDropdown = document.getElementById('mobile-dropdown');
-        const header = document.getElementById('header');
+    // JavaScript to toggle the mobile dropdown menu
+    const mobileMenuButton = document.getElementById('mobile-menu');
+    const mobileDropdown = document.getElementById('mobile-dropdown');
+    const header = document.getElementById('header');
 
-        mobileMenuButton.addEventListener('click', () => {
-          // Cek apakah dropdown sedang tersembunyi
-          const isHidden = mobileDropdown.classList.contains('hidden');
+    mobileMenuButton.addEventListener('click', () => {
+        const isHidden = mobileDropdown.classList.contains('hidden');
 
-          if (isHidden) {
-            // Jika dropdown disembunyikan, munculkan dropdown dan tambahkan background pada header
+        if (isHidden) {
             mobileDropdown.classList.remove('hidden', '-translate-y-full');
             header.classList.add('bg-warna-300');
-          } else {
-            // Jika dropdown terlihat, sembunyikan dropdown dan hapus background pada header
+        } else {
             mobileDropdown.classList.add('-translate-y-full');
             setTimeout(() => {
-              mobileDropdown.classList.add('hidden');
-           
-            }, 300); // Tunggu animasi selesai
-          }
-        });
+                mobileDropdown.classList.add('hidden');
+            }, 300);
+        }
+    });
 
-        // JavaScript to close mobile dropdown and scroll to top when clicking a link
-        const mobileMenuLinks = document.querySelectorAll('#mobile-dropdown a');
+    // JavaScript to close mobile dropdown and scroll to top when clicking a link
+    const mobileMenuLinks = document.querySelectorAll('#mobile-dropdown a');
 
-        mobileMenuLinks.forEach(link => {
-          link.addEventListener('click', () => {
-            // Sembunyikan dropdown menu
+    mobileMenuLinks.forEach(link => {
+        link.addEventListener('click', () => {
             mobileDropdown.classList.add('-translate-y-full');
             setTimeout(() => {
-              mobileDropdown.classList.add('hidden');
-            }, 300); // Tunggu animasi selesai
+                mobileDropdown.classList.add('hidden');
+            }, 300);
 
-            // Scroll halaman ke atas
             window.scrollTo({
-              top: 0,
-              behavior: 'smooth' // Animasi smooth
+                top: 0,
+                behavior: 'smooth'
             });
-          });
         });
-
-
-
-    </script>
+    });
+</script>
 
 </body>
 </html>

@@ -418,7 +418,7 @@ class KelolaMember extends Component
             'transaction_datetime' => now(),
             'transaction_type' => 'membership_payment',
             'description' => 'Manual pembayaran membership atas nama ' . $member->name,
-            'total_amount' => \App\Models\Setting::where('key', 'base_monthly_membership_fee')->value('value') ?? 120000,
+            'total_amount' => \App\Models\Setting::where('setting_key', 'base_monthly_membership_fee')->value('setting_value') ?? 120000,
             'payment_method' => 'cash',
 
         ]);
