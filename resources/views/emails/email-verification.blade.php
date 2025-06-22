@@ -74,11 +74,11 @@
                 Jika Anda tidak membuat akun ini, abaikan email ini.
             </p>
             <p style="color: #7f8c8d; margin: 0; font-size: 12px;">
-                © 2024 GYMYANKARTA. Semua hak dilindungi.
+                © 2025 GYMYANKARTA. Semua hak dilindungi.
             </p>
             <div style="margin-top: 15px;">
                 <span style="color: #95a5a6; font-size: 12px;">
-                    📧 support@gymyankarta.com | 📞 (021) 123-4567
+                    📧 yankartagym@gmail.com | 📞 +62 819-3601-1544
                 </span>
             </div>
         </div>

@@ -159,9 +159,10 @@ class Dashboard extends Component
     private function loadMonthlyRevenue()
     {
         // Monthly revenue chart data
-        $rawData = Transaction::selectRaw("strftime('%m', transaction_datetime) as month, SUM(total_amount) as total")
-            ->whereRaw("strftime('%Y', transaction_datetime) = ?", [now()->format('Y')])
-            ->groupByRaw("strftime('%m', transaction_datetime)")
+        // Menggunakan YEAR() dan MONTH() untuk MySQL
+        $rawData = Transaction::selectRaw("MONTH(transaction_datetime) as month, SUM(total_amount) as total")
+            ->whereRaw("YEAR(transaction_datetime) = ?", [now()->format('Y')])
+            ->groupByRaw("MONTH(transaction_datetime)")
             ->pluck('total', 'month')
             ->mapWithKeys(fn($value, $key) => [(int)$key => $value])
             ->toArray();

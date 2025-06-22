@@ -22,7 +22,7 @@
         <div class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white p-6 rounded-xl shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-yellow-100">Member Beku</p>
+                    <p class="text-sm text-yellow-100">Member Frozen</p>
                     <p class="text-2xl font-bold">{{ $totalFrozen }}</p>
                 </div>
                 <div class="bg-white/20 p-3 rounded-full">
