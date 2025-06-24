@@ -170,7 +170,7 @@
                     <i class="fas fa-times text-sm text-warna-900"></i>
                 </div>
                 <h3 class="text-xs font-medium text-gray-500 mb-1">Tidak Hadir</h3>
-                <p class="text-xl font-bold text-gray-800">{{ $sisaHariAktif }}</p>
+                <p class="text-xl font-bold text-gray-800">{{ $totalTidakHadir }}</p>
             </div>
             <div class="bg-white px-3 py-4 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
                 <div class="w-8 h-8 bg-warna-600/30 rounded-full flex items-center justify-center mb-2">
