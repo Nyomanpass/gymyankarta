@@ -567,6 +567,12 @@
         statusMessage: 'Memulai sistem...',
         isScanning: false,
         
+        // ✅ TAMBAHAN: Camera management
+        availableCameras: [],
+        currentCameraId: null,
+        currentFacingMode: 'environment', // 'environment' for back, 'user' for front
+        isBackCamera: true,
+        
         // QR Scanner instance
         html5QrCode: null,
         
@@ -581,6 +587,9 @@
             if (!this.checkBrowserSupport()) {
                 return;
             }
+            
+            // Load available cameras
+            await this.loadAvailableCameras();
             
             // Auto request camera permission
             setTimeout(() => {
@@ -603,6 +612,18 @@
             
             console.log('Html5Qrcode library loaded');
             return true;
+        },
+        
+        // ✅ TAMBAHAN: Load available cameras
+        async loadAvailableCameras() {
+            try {
+                const cameras = await Html5Qrcode.getCameras();
+                this.availableCameras = cameras || [];
+                console.log('📱 Available cameras:', this.availableCameras);
+            } catch (error) {
+                console.log('Could not load cameras:', error);
+                this.availableCameras = [];
+            }
         },
         
         checkBrowserSupport() {
@@ -633,18 +654,38 @@
             this.setStatus('Meminta izin kamera...', true);
             
             try {
-                // Test camera access with explicit constraints
+                // ✅ PERBAIKAN: Dynamic constraints based on current facing mode
                 const constraints = {
                     video: {
-                        facingMode: { ideal: 'environment' },
-                        width: { ideal: 640, min: 320 },
-                        height: { ideal: 480, min: 240 }
+                        facingMode: { exact: this.currentFacingMode },
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
                     }
                 };
                 
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    console.log('✅ Camera accessed with exact constraint');
+                } catch (exactError) {
+                    console.log('⚠️ Exact constraint failed, trying ideal...');
+                    const fallbackConstraints = {
+                        video: {
+                            facingMode: { ideal: this.currentFacingMode },
+                            width: { ideal: 640, min: 320 },
+                            height: { ideal: 480, min: 240 }
+                        }
+                    };
+                    stream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+                    console.log('✅ Camera accessed with ideal constraint');
+                }
+                
                 console.log('Camera permission granted');
-                console.log('Stream tracks:', stream.getTracks().map(t => ({ kind: t.kind, label: t.label })));
+                console.log('Stream tracks:', stream.getTracks().map(t => ({ 
+                    kind: t.kind, 
+                    label: t.label,
+                    settings: t.getSettings() 
+                })));
                 
                 // Stop test stream
                 stream.getTracks().forEach(track => {
@@ -682,8 +723,11 @@
                         errorMessage += 'Kamera sedang digunakan aplikasi lain.';
                         break;
                     case 'OverconstrainedError':
-                        errorMessage += 'Pengaturan kamera tidak dapat dipenuhi.';
-                        break;
+                        errorMessage += 'Kamera tidak tersedia. Mencoba kamera alternatif...';
+                        setTimeout(() => {
+                            this.retryWithFlexibleConstraints();
+                        }, 1000);
+                        return;
                     default:
                         errorMessage += error.message || 'Error tidak diketahui.';
                 }
@@ -692,9 +736,40 @@
             }
         },
         
+        async retryWithFlexibleConstraints() {
+            try {
+                this.setStatus('Mencari kamera yang tersedia...', true);
+                
+                const flexibleConstraints = {
+                    video: {
+                        facingMode: this.currentFacingMode,
+                        width: { min: 320 },
+                        height: { min: 240 }
+                    }
+                };
+                
+                const stream = await navigator.mediaDevices.getUserMedia(flexibleConstraints);
+                console.log('✅ Camera accessed with flexible constraints');
+                
+                stream.getTracks().forEach(track => track.stop());
+                
+                this.cameraGranted = true;
+                this.isRequesting = false;
+                this.setStatus('Kamera ditemukan, memulai scanner...', true);
+                
+                setTimeout(async () => {
+                    await this.startQrScanner();
+                }, 1000);
+                
+            } catch (retryError) {
+                console.error('Flexible constraint retry failed:', retryError);
+                this.setError('Tidak dapat mengakses kamera yang sesuai.');
+            }
+        },
+        
         async startQrScanner() {
             if (this.isScanning) {
-                console.log('Scanner already running');
+              
                 return;
             }
             
@@ -714,28 +789,23 @@
                 
                 // Success callback
                 const qrCodeSuccessCallback = (decodedText, decodedResult) => {
-                    console.log('QR Code detected:', decodedText);
+       
                     
-                    // Stop scanner immediately
                     this.stopScanner().then(() => {
                         this.setStatus('QR Code terdeteksi! Memproses...', true);
-                        
-                        // Process through Livewire
-                        @this.call('processQrScan', decodedText);
+                        this.processQrAndRefresh(decodedText);
                     });
                 };
                 
-                // Error callback (untuk debugging)
+                // Error callback
                 const qrCodeErrorCallback = (errorMessage) => {
-                    // Log hanya error penting, bukan scan failures
                     if (errorMessage.includes('NotFound') || errorMessage.includes('No QR code found')) {
-                        // Normal scanning, tidak perlu log
                         return;
                     }
-                    console.log('QR scan error:', errorMessage);
+                   
                 };
                 
-                // Scanner config
+                // ✅ PERBAIKAN: Scanner config based on camera type
                 const config = {
                     fps: 10,
                     qrbox: { width: 200, height: 200 },
@@ -743,43 +813,21 @@
                     showTorchButtonIfSupported: true,
                     showZoomSliderIfSupported: false,
                     defaultZoomValueIfSupported: 1,
-                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
+                    supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
+                    videoConstraints: {
+                        facingMode: { exact: this.currentFacingMode }
+                    }
                 };
                 
                 // Initialize scanner
                 this.html5QrCode = new Html5Qrcode('qr-reader');
                 
-                // Get available cameras
-                let cameraId = { facingMode: 'environment' };
-                
-                try {
-                    const cameras = await Html5Qrcode.getCameras();
-                    console.log('Available cameras:', cameras);
-                    
-                    if (cameras && cameras.length > 0) {
-                        // Find back camera first
-                        const backCamera = cameras.find(camera => 
-                            camera.label.toLowerCase().includes('back') || 
-                            camera.label.toLowerCase().includes('rear') ||
-                            camera.label.toLowerCase().includes('environment') ||
-                            camera.label.toLowerCase().includes('0')
-                        );
-                        
-                        if (backCamera) {
-                            cameraId = backCamera.id;
-                            console.log('📱 Using back camera:', backCamera.label);
-                        } else {
-                            cameraId = cameras[0].id;
-                            console.log('📱 Using first camera:', cameras[0].label);
-                        }
-                    }
-                } catch (err) {
-                    console.log('Could not enumerate cameras, using facingMode:', err);
-                }
+                // ✅ PERBAIKAN: Select camera based on current facing mode
+                let cameraId = await this.selectCamera();
                 
                 this.setStatus('Menghubungkan ke kamera...', true);
                 
-                // Start scanner with proper error handling
+                // Start scanner
                 await this.html5QrCode.start(
                     cameraId,
                     config,
@@ -787,14 +835,17 @@
                     qrCodeErrorCallback
                 );
                 
-                // Hide status after successful start
+                // ✅ TAMBAHAN: Store current camera ID
+                this.currentCameraId = cameraId;
+                
                 setTimeout(() => {
+                    this.fixCameraMirror();
                     this.hideStatus();
-                    console.log('QR Scanner started successfully');
+                    
                 }, 1000);
                 
             } catch (error) {
-                console.error('QR Scanner start error:', error);
+              
                 this.isScanning = false;
                 
                 let errorMessage = 'Gagal memulai scanner: ';
@@ -813,13 +864,144 @@
                 
                 this.setError(errorMessage);
                 
-                // Retry dengan pengaturan yang lebih sederhana
                 if (error.toString().includes('OverConstrainedError')) {
                     console.log('🔄 Retrying with basic constraints...');
                     setTimeout(() => {
                         this.retryWithBasicConfig();
                     }, 2000);
                 }
+            }
+        },
+        
+        // ✅ TAMBAHAN: Switch camera function
+        async switchCamera() {
+            if (!this.isScanning || this.availableCameras.length < 2) {
+                return;
+            }
+            
+            try {
+                this.setStatus('Beralih kamera...', true);
+                
+                // Toggle facing mode
+                this.currentFacingMode = this.currentFacingMode === 'environment' ? 'user' : 'environment';
+                this.isBackCamera = this.currentFacingMode === 'environment';
+                
+                console.log('🔄 Switching to:', this.currentFacingMode);
+                
+                // Stop current scanner
+                await this.stopScanner();
+                
+                // Restart with new camera
+                setTimeout(async () => {
+                    await this.startQrScanner();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Error switching camera:', error);
+                this.setError('Gagal beralih kamera: ' + error.message);
+            }
+        },
+        
+        fixCameraMirror() {
+            try {
+                const videoElement = document.querySelector('#qr-reader video');
+                if (videoElement) {
+                    // ✅ PERBAIKAN: Apply mirror only for front camera
+                    if (this.currentFacingMode === 'user') {
+                        // Front camera - apply mirror
+                        videoElement.style.transform = 'scaleX(-1)';
+                        videoElement.style.webkitTransform = 'scaleX(-1)';
+                        
+                    } else {
+                        // Back camera - no mirror
+                        videoElement.style.transform = 'scaleX(1)';
+                        videoElement.style.webkitTransform = 'scaleX(1)';
+                        
+                    }
+                }
+            } catch (error) {
+                
+            }
+        },
+        
+        async processQrAndRefresh(qrData) {
+            try {
+                await @this.call('processQrScan', qrData);
+                
+                setTimeout(() => {
+                    console.log('🔄 Refreshing page after successful scan...');
+                    window.location.reload();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error processing QR:', error);
+                this.setError('Gagal memproses QR Code: ' + error.message);
+            }
+        },
+        
+        // ✅ PERBAIKAN: Select camera based on facing mode
+        async selectCamera() {
+            try {
+                if (this.availableCameras.length === 0) {
+                    
+                    return { facingMode: { exact: this.currentFacingMode } };
+                }
+                
+                const targetKeywords = this.currentFacingMode === 'environment' 
+                    ? ['back', 'rear', 'environment', 'facing back', 'camera2', '0', 'main', 'wide']
+                    : ['front', 'user', 'facing front', 'camera1', 'selfie'];
+                
+                let selectedCamera = null;
+                
+                // Find camera by label
+                for (const camera of this.availableCameras) {
+                    const label = camera.label.toLowerCase();
+                    console.log('🔍 Checking camera:', camera.label);
+                    
+                    for (const keyword of targetKeywords) {
+                        if (label.includes(keyword)) {
+                            selectedCamera = camera;
+                            
+                            break;
+                        }
+                    }
+                    if (selectedCamera) break;
+                }
+                
+                // Find by ID if not found by label
+                if (!selectedCamera) {
+                    const cameraById = this.availableCameras.find(camera => {
+                        const id = camera.id.toLowerCase();
+                        if (this.currentFacingMode === 'environment') {
+                            return id.includes('0') || id.includes('back') || id.includes('environment');
+                        } else {
+                            return id.includes('1') || id.includes('front') || id.includes('user');
+                        }
+                    });
+                    
+                    if (cameraById) {
+                        selectedCamera = cameraById;
+                        
+                    }
+                }
+                
+                // Use positional fallback
+                if (!selectedCamera) {
+                    if (this.currentFacingMode === 'environment' && this.availableCameras.length > 1) {
+                        selectedCamera = this.availableCameras[this.availableCameras.length - 1];
+                        
+                    } else {
+                        selectedCamera = this.availableCameras[0];
+                        
+                    }
+                }
+                
+               
+                return selectedCamera.id;
+                
+            } catch (err) {
+               
+                return { facingMode: { exact: this.currentFacingMode } };
             }
         },
         
@@ -830,28 +1012,34 @@
                 const basicConfig = {
                     fps: 5,
                     qrbox: 150,
-                    aspectRatio: 1.0
+                    aspectRatio: 1.0,
+                    videoConstraints: {
+                        facingMode: { exact: this.currentFacingMode }
+                    }
                 };
                 
+                let cameraConstraint = { facingMode: { exact: this.currentFacingMode } };
+                
                 await this.html5QrCode.start(
-                    { facingMode: 'environment' },
+                    cameraConstraint,
                     basicConfig,
                     (decodedText) => {
-                        console.log('QR Code detected (retry):', decodedText);
+                        
                         this.stopScanner().then(() => {
-                            @this.call('processQrScan', decodedText);
+                            this.processQrAndRefresh(decodedText);
                         });
                     },
                     () => { /* silent */ }
                 );
                 
                 setTimeout(() => {
+                    this.fixCameraMirror();
                     this.hideStatus();
-                    console.log('QR Scanner started with basic config');
+                    
                 }, 1000);
                 
             } catch (retryError) {
-                console.error('Retry failed:', retryError);
+                
                 this.setError('Gagal memulai scanner dengan pengaturan alternatif.');
             }
         },
@@ -893,10 +1081,9 @@
             this.hasError = true;
             this.showStatus = false;
             this.isScanning = false;
-            console.error('Error:', message);
+            console.error('❌ Error:', message);
         },
         
-        // Manual retry
         retryCamera() {
             this.hasError = false;
             this.cameraGranted = false;
@@ -910,9 +1097,19 @@
             <!-- Header -->
             <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
                 <h3 class="text-lg font-semibold text-gray-800">Scan QR Code Absensi</h3>
-                <button @click="closeScanner()" class="text-gray-400 hover:text-gray-600 text-2xl">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div class="flex items-center space-x-2">
+                    <!-- ✅ TAMBAHAN: Camera Switch Button -->
+                    <button @click="switchCamera()" 
+                            x-show="isScanning && availableCameras.length > 1"
+                            class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                            :title="isBackCamera ? 'Beralih ke Kamera Depan' : 'Beralih ke Kamera Belakang'">
+                        <i class="fas fa-sync-alt text-lg"></i>
+                    </button>
+                    
+                    <button @click="closeScanner()" class="text-gray-400 hover:text-gray-600 text-2xl">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             </div>
             
             <!-- Scanner Container -->
@@ -927,12 +1124,12 @@
                     </div>
                 </div>
                 
-                <!-- QR Scanner Area -->
+                <!-- ✅ PERBAIKAN: QR Scanner Area dengan CSS fix untuk mirror -->
                 <div class="relative bg-black rounded-lg overflow-hidden" style="height: 300px;">
                     <!-- Video akan muncul di sini -->
                     <div id="qr-reader" class="w-full h-full"></div>
                     
-                    <!-- Scanner Overlay - hanya muncul saat tidak ada video -->
+                    <!-- Scanner Overlay -->
                     <div x-show="!isScanning || showStatus" class="absolute inset-0 flex items-center justify-center pointer-events-none">
                         <div class="w-48 h-48 border-2 border-white rounded-lg relative">
                             <!-- Corner indicators -->
@@ -944,6 +1141,17 @@
                             <!-- Scanning line animation -->
                             <div x-show="isScanning && !showStatus" class="absolute top-1/2 left-0 w-full h-1 bg-warna-400 animate-pulse"></div>
                         </div>
+                    </div>
+                    
+                    <!-- ✅ TAMBAHAN: Camera Switch Button (In-Camera) -->
+                    <div x-show="isScanning && !showStatus && availableCameras.length > 1" 
+                         class="absolute top-4 right-4 z-10">
+                        <button @click="switchCamera()" 
+                                class="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
+                                :title="isBackCamera ? 'Beralih ke Kamera Depan' : 'Beralih ke Kamera Belakang'">
+                            <i class="fas fa-camera-rotate text-lg" x-show="isBackCamera"></i>
+                            <i class="fas fa-camera text-lg" x-show="!isBackCamera"></i>
+                        </button>
                     </div>
                     
                     <!-- Status Messages -->
@@ -969,6 +1177,14 @@
                     @endif
                 </div>
                 
+                <!-- ✅ TAMBAHAN: Camera Info -->
+                <div x-show="isScanning && !showStatus" class="mt-3 text-center">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">
+                        <i :class="isBackCamera ? 'fas fa-camera' : 'fas fa-camera-rotate'"></i>
+                        <span x-text="isBackCamera ? 'Kamera Belakang' : 'Kamera Depan'"></span>
+                    </div>
+                </div>
+                
                 <!-- Instructions -->
                 <div class="mt-4 space-y-2 text-xs text-gray-600">
                     <div class="flex items-center">
@@ -979,9 +1195,13 @@
                         <i class="fas fa-check text-green-500 mr-2 w-4"></i>
                         <span>Pastikan pencahayaan cukup terang</span>
                     </div>
+                    <div class="flex items-center" x-show="availableCameras.length > 1">
+                        <i class="fas fa-sync-alt text-blue-500 mr-2 w-4"></i>
+                        <span>Tap ikon switch untuk beralih kamera</span>
+                    </div>
                     <div class="flex items-center">
-                        <i class="fas fa-check text-green-500 mr-2 w-4"></i>
-                        <span>Tunggu hingga QR Code terdeteksi otomatis</span>
+                        <i class="fas fa-refresh text-blue-500 mr-2 w-4"></i>
+                        <span>Halaman akan refresh otomatis setelah scan berhasil</span>
                     </div>
                 </div>
                 
@@ -1013,11 +1233,10 @@
                 <button @click="closeScanner()" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
                     Tutup
                 </button>
+                
             </div>
         </div>
     </div>
-    
-
 @endif
 
     @if(session('message'))
@@ -1101,6 +1320,36 @@
                             </button>
                         </div>
                     @endif
+                    @if(session()->has('message'))
+                        <div class="relative inline-block">
+                            <button type="button" 
+                                    class="flex items-center justify-center w-8 h-8 bg-green-100 hover:bg-green-200 text-green-600 rounded-full transition-colors duration-200"
+                                    x-data="{ showMessage: false }"
+                                    @mouseenter="showMessage = true"
+                                    @mouseleave="showMessage = false"
+                                    @click="showMessage = !showMessage">
+                                <i class="fas fa-info-circle text-sm"></i>
+                                
+                                <!-- Tooltip with message -->
+                                <div x-show="showMessage"
+                                    x-cloak
+                                    x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 transform scale-95"
+                                    x-transition:enter-end="opacity-100 transform scale-100"
+                                    x-transition:leave="transition ease-in duration-150"
+                                    x-transition:leave-start="opacity-100 transform scale-100"
+                                    x-transition:leave-end="opacity-0 transform scale-95"
+                                    class="absolute top-10 right-0 z-50 w-64 bg-white border border-green-200 rounded-lg shadow-lg p-3">
+                                    <div class="text-green-600 text-sm">
+                                        <div class="font-semibold mb-2">Info:</div>
+                                        <p class="text-xs">{{ session('message') }}</p>
+                                    </div>
+                                    <!-- Arrow pointing up -->
+                                    <div class="absolute -top-2 right-3 w-4 h-4 bg-white border-l border-t border-green-200 transform rotate-45"></div>
+                                </div>
+                            </button>
+                        </div>
+                    @endif
                 </div>
                 <div class="space-y-4">
                     <x-g-input 
@@ -1123,7 +1372,13 @@
                     />   
                 </div>
                 <x-slot name="actions">
-                    <button @click-"show = false" wire:click="changePassword" class="px-5 py-2 bg-warna-400 text-white rounded-lg hover:bg-warna-400/80 transition-all active:scale-95">Simpan</button>
+                    <button wire:click="changePassword" 
+                        wire:loading.attr="disabled"
+                        wire:target="changePassword"
+                        class="px-5 py-2 bg-warna-400 hover:bg-warna-400/80 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all active:scale-95">
+                        <span wire:loading.remove wire:target="changePassword">Simpan</span>
+                        <span wire:loading wire:target="changePassword">Menyimpan...</span>
+                    </button>
                 </x-slot>
             </x-input-modal>
         </div>

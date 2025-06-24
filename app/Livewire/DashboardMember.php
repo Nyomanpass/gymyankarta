@@ -425,12 +425,18 @@ class DashboardMember extends Component
     public function toggleChangePasswordModal()
     {
         $this->showChangePasswordModal = !$this->showChangePasswordModal;
+        if (!$this->showChangePasswordModal) {
+            // Reset fields when closing modal
+            $this->oldPassword = '';
+            $this->newPassword = '';
+            $this->confirmNewPassword = '';
+        }
     }
 
     public function changePassword()
     {
         $this->validate([
-            'oldPassword' => 'required|string|min:8',
+            'oldPassword' => 'required|string',
             'newPassword' => 'required|string|min:8',
             'confirmNewPassword' => 'required|string|min:8',
         ], [
