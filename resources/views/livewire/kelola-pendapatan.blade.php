@@ -100,8 +100,8 @@
                             />
                         @endif
 
-                        <!-- Durasi Membership (muncul jika member_type adalah foreign) -->
-                        @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
+                        <!-- Durasi Membership (muncul untuk semua member type) -->
+                        @if($member_type || $selectedMemberData->member_type)
                             <x-g-input 
                                 label="Durasi Keanggotaan"
                                 type="select"
@@ -109,8 +109,6 @@
                                 wire:model.live="duration_membership"
                                 :options="$durationOptions"
                             />
-                        @elseif($member_type === 'local' || $selectedMemberData->member_type === 'local')
-                            <input type="hidden" name="duration_membership" value="one_month" wire:model.live="duration_membership">
                         @endif
 
                     @endif
@@ -284,7 +282,7 @@
                                     <span class="font-medium">{{ ucfirst($member_type ?: $selectedMemberData->member_type) }}</span>
                                 </div>
                             @endif
-                            @if($duration_membership && ($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign'))
+                            @if($duration_membership)
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Durasi:</span>
                                     <span class="font-medium">{{ $durationOptions[$duration_membership] ?? $duration_membership }}</span>
@@ -301,24 +299,24 @@
                                 </span>
                             </div>
                             
-                            @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
-                                <div class="mt-2 text-xs text-gray-500">
-                                    @switch($duration_membership)
-                                        @case('one_week')
-                                            <p>* 1 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('two_weeks')
-                                            <p>* 2 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('three_weeks')
-                                            <p>* 3 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('one_month')
-                                            <p>* 1 Bulan - Harga tetap</p>
-                                            @break
-                                    @endswitch
-                                </div>
-                            @endif
+                            <div class="mt-2 text-xs text-gray-500">
+                                <p>* Harga {{ ucfirst($member_type ?: $selectedMemberData->member_type) }} - 
+                                @switch($duration_membership)
+                                    @case('one_week')
+                                        1 Minggu
+                                        @break
+                                    @case('two_weeks')
+                                        2 Minggu
+                                        @break
+                                    @case('three_weeks')
+                                        3 Minggu
+                                        @break
+                                    @case('one_month')
+                                        1 Bulan
+                                        @break
+                                @endswitch
+                                </p>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -744,7 +742,7 @@
                                         <span class="font-medium">{{ ucfirst($member_type ?: $selectedMemberData->member_type) }}</span>
                                     </div>
                                 @endif
-                                @if($duration_membership && ($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign'))
+                                @if($duration_membership)
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Durasi:</span>
                                         <span class="font-medium">{{ $durationOptions[$duration_membership] ?? $duration_membership }}</span>
@@ -761,24 +759,24 @@
                                     </span>
                                 </div>
                                 
-                                @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
-                                    <div class="mt-2 text-xs text-gray-500">
-                                        @switch($duration_membership)
-                                            @case('1_week')
-                                                <p>* 1 Minggu = 30% dari harga bulanan</p>
-                                                @break
-                                            @case('2_weeks')
-                                                <p>* 2 Minggu = 50% dari harga bulanan</p>
-                                                @break
-                                            @case('3_weeks')
-                                                <p>* 3 Minggu = 70% dari harga bulanan</p>
-                                                @break
-                                            @case('1_month')
-                                                <p>* 1 Bulan = 100% harga bulanan</p>
-                                                @break
-                                        @endswitch
-                                    </div>
-                                @endif
+                                <div class="mt-2 text-xs text-gray-500">
+                                    <p>* Harga {{ ucfirst($member_type ?: $selectedMemberData->member_type) }} - 
+                                    @switch($duration_membership)
+                                        @case('one_week')
+                                            1 Minggu
+                                            @break
+                                        @case('two_weeks')
+                                            2 Minggu
+                                            @break
+                                        @case('three_weeks')
+                                            3 Minggu
+                                            @break
+                                        @case('one_month')
+                                            1 Bulan
+                                            @break
+                                    @endswitch
+                                    </p>
+                                </div>
                             </div>
                         @endif
                     </div>

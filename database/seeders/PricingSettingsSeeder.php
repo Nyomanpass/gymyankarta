@@ -52,12 +52,46 @@ class PricingSettingsSeeder extends Seeder
             );
         }
 
+        // Local membership prices dengan berbagai durasi
+        $localSettings = [
+            [
+                'setting_key' => 'local_membership_1_week',
+                'setting_value' => '75000',
+                'description' => 'Harga membership local 1 minggu'
+            ],
+            [
+                'setting_key' => 'local_membership_2_weeks',
+                'setting_value' => '125000',
+                'description' => 'Harga membership local 2 minggu'
+            ],
+            [
+                'setting_key' => 'local_membership_3_weeks',
+                'setting_value' => '175000',
+                'description' => 'Harga membership local 3 minggu'
+            ],
+            [
+                'setting_key' => 'local_membership_1_month',
+                'setting_value' => '200000',
+                'description' => 'Harga membership local 1 bulan'
+            ],
+        ];
+
+        foreach ($localSettings as $setting) {
+            Setting::updateOrCreate(
+                ['setting_key' => $setting['setting_key']],
+                [
+                    'setting_value' => $setting['setting_value'],
+                    'description' => $setting['description']
+                ]
+            );
+        }
+
         // Set default prices
         Setting::updateOrCreate(
             ['setting_key' => 'base_monthly_membership_fee'],
             [
-                'setting_value' => '100000',
-                'description' => 'Harga dasar membership bulanan lokal'
+                'setting_value' => '200000',
+                'description' => 'Harga dasar membership bulanan lokal (backup)'
             ]
         );
 
