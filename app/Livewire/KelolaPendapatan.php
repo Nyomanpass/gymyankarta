@@ -56,6 +56,10 @@ class KelolaPendapatan extends Component
     //modals
     public $isNotificationModalOpen = false;
 
+    // Properties for delete transaction feature
+    public $showDeleteModal = false;
+    public $transactionToDelete = null;
+
 
     public function updatedPerPage()
     {
@@ -494,5 +498,81 @@ class KelolaPendapatan extends Component
             'title' => 'Refresh Berhasil',
             'description' => 'Data transaksi berhasil diperbarui.',
         ]);
+    }
+
+    // ✅ TAMBAHAN: Methods untuk delete transaction
+    public function confirmDeleteTransaction($transactionId)
+    {
+        $this->transactionToDelete = $transactionId;
+        $this->showDeleteModal = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->showDeleteModal = false;
+        $this->transactionToDelete = null;
+    }
+
+    public function deleteTransaction()
+    {
+        try {
+            if (!$this->transactionToDelete) {
+                session()->flash('message', [
+                    'type' => 'error',
+                    'title' => 'Gagal Menghapus',
+                    'description' => 'Transaksi tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            $transaction = Transaction::find($this->transactionToDelete);
+
+            if (!$transaction) {
+                session()->flash('message', [
+                    'type' => 'error',
+                    'title' => 'Gagal Menghapus',
+                    'description' => 'Transaksi tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            DB::beginTransaction();
+
+            // Delete related transaction items if exists
+            TransactionItem::where('transaction_id', $transaction->id)->delete();
+
+            // Delete the main transaction
+            $transaction->delete();
+
+            DB::commit();
+
+            // Reload data
+            $this->loadTodayTotals();
+            $this->resetPage();
+
+            // Close modal
+            $this->showDeleteModal = false;
+            $this->transactionToDelete = null;
+
+            session()->flash('message', [
+                'type' => 'success',
+                'title' => 'Berhasil Dihapus',
+                'description' => 'Transaksi berhasil dihapus dari sistem.',
+            ]);
+
+            $this->isNotificationModalOpen = true;
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error('Delete transaction failed: ' . $e->getMessage());
+
+            session()->flash('message', [
+                'type' => 'error',
+                'title' => 'Gagal Menghapus',
+                'description' => 'Terjadi kesalahan saat menghapus transaksi: ' . $e->getMessage(),
+            ]);
+
+            $this->isNotificationModalOpen = true;
+        }
     }
 }
