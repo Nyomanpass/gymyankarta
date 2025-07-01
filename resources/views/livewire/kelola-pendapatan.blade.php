@@ -100,8 +100,8 @@
                             />
                         @endif
 
-                        <!-- Durasi Membership (muncul jika member_type adalah foreign) -->
-                        @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
+                        <!-- Durasi Membership (muncul untuk semua member type) -->
+                        @if($member_type || $selectedMemberData->member_type)
                             <x-g-input 
                                 label="Durasi Keanggotaan"
                                 type="select"
@@ -109,8 +109,6 @@
                                 wire:model.live="duration_membership"
                                 :options="$durationOptions"
                             />
-                        @elseif($member_type === 'local' || $selectedMemberData->member_type === 'local')
-                            <input type="hidden" name="duration_membership" value="one_month" wire:model.live="duration_membership">
                         @endif
 
                     @endif
@@ -284,7 +282,7 @@
                                     <span class="font-medium">{{ ucfirst($member_type ?: $selectedMemberData->member_type) }}</span>
                                 </div>
                             @endif
-                            @if($duration_membership && ($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign'))
+                            @if($duration_membership)
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Durasi:</span>
                                     <span class="font-medium">{{ $durationOptions[$duration_membership] ?? $duration_membership }}</span>
@@ -301,24 +299,24 @@
                                 </span>
                             </div>
                             
-                            @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
-                                <div class="mt-2 text-xs text-gray-500">
-                                    @switch($duration_membership)
-                                        @case('one_week')
-                                            <p>* 1 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('two_weeks')
-                                            <p>* 2 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('three_weeks')
-                                            <p>* 3 Minggu - Harga tetap</p>
-                                            @break
-                                        @case('one_month')
-                                            <p>* 1 Bulan - Harga tetap</p>
-                                            @break
-                                    @endswitch
-                                </div>
-                            @endif
+                            <div class="mt-2 text-xs text-gray-500">
+                                <p>* Harga {{ ucfirst($member_type ?: $selectedMemberData->member_type) }} - 
+                                @switch($duration_membership)
+                                    @case('one_week')
+                                        1 Minggu
+                                        @break
+                                    @case('two_weeks')
+                                        2 Minggu
+                                        @break
+                                    @case('three_weeks')
+                                        3 Minggu
+                                        @break
+                                    @case('one_month')
+                                        1 Bulan
+                                        @break
+                                @endswitch
+                                </p>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -448,6 +446,7 @@
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 uppercase">Deskripsi</th>
                             <th class="px-4 py-3 text-left font-semibold text-gray-700 uppercase">Pembayaran</th>
                             <th class="px-4 py-3 text-right font-semibold text-gray-700 uppercase">Jumlah</th>
+                            <th class="px-4 py-3 text-center font-semibold text-gray-700 uppercase">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -500,10 +499,20 @@
                                 <td class="px-4 py-3 text-right font-semibold text-warna-600">
                                     Rp {{ number_format($transaction->total_amount, 0, ',', '.') }}
                                 </td>
+                                <td class="px-4 py-3 text-center">
+                                    <button 
+                                        wire:click="confirmDeleteTransaction({{ $transaction->id }})"
+                                        class="inline-flex items-center px-2 py-1 bg-red-100 hover:bg-red-200 text-red-600 text-xs font-medium rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                        title="Hapus Transaksi"
+                                    >
+                                        <i class="fas fa-trash text-xs"></i>
+                                        <span class="ml-1 hidden sm:inline">Hapus</span>
+                                    </button>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                                <td colspan="6" class="px-4 py-8 text-center text-gray-500">
                                     <i class="fas fa-inbox text-3xl mb-3 block text-gray-300"></i>
                                     <p>Belum ada transaksi hari ini</p>
                                     <p class="text-xs mt-1">Transaksi akan muncul setelah Anda melakukan penjualan</p>
@@ -733,7 +742,7 @@
                                         <span class="font-medium">{{ ucfirst($member_type ?: $selectedMemberData->member_type) }}</span>
                                     </div>
                                 @endif
-                                @if($duration_membership && ($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign'))
+                                @if($duration_membership)
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Durasi:</span>
                                         <span class="font-medium">{{ $durationOptions[$duration_membership] ?? $duration_membership }}</span>
@@ -750,24 +759,24 @@
                                     </span>
                                 </div>
                                 
-                                @if($member_type === 'foreign' || $selectedMemberData->member_type === 'foreign')
-                                    <div class="mt-2 text-xs text-gray-500">
-                                        @switch($duration_membership)
-                                            @case('1_week')
-                                                <p>* 1 Minggu = 30% dari harga bulanan</p>
-                                                @break
-                                            @case('2_weeks')
-                                                <p>* 2 Minggu = 50% dari harga bulanan</p>
-                                                @break
-                                            @case('3_weeks')
-                                                <p>* 3 Minggu = 70% dari harga bulanan</p>
-                                                @break
-                                            @case('1_month')
-                                                <p>* 1 Bulan = 100% harga bulanan</p>
-                                                @break
-                                        @endswitch
-                                    </div>
-                                @endif
+                                <div class="mt-2 text-xs text-gray-500">
+                                    <p>* Harga {{ ucfirst($member_type ?: $selectedMemberData->member_type) }} - 
+                                    @switch($duration_membership)
+                                        @case('one_week')
+                                            1 Minggu
+                                            @break
+                                        @case('two_weeks')
+                                            2 Minggu
+                                            @break
+                                        @case('three_weeks')
+                                            3 Minggu
+                                            @break
+                                        @case('one_month')
+                                            1 Bulan
+                                            @break
+                                    @endswitch
+                                    </p>
+                                </div>
                             </div>
                         @endif
                     </div>
@@ -964,5 +973,53 @@
 
         </div>
     </div>
+
+    <!-- Modal Konfirmasi Delete -->
+    @if($showDeleteModal)
+    <div class="fixed z-50 inset-0 flex items-center justify-center bg-warna-300/50">
+        <div class="relative bg-white rounded-lg shadow-lg p-6 mx-7 md:mx-0 w-full max-w-md">
+            <div class="text-center"
+                 x-data="{ show: false }"
+                 x-init="setTimeout(() => show = true, 50)"
+                 x-show="show"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 transform scale-95"
+                 x-transition:enter-end="opacity-100 transform scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 transform scale-100"
+                 x-transition:leave-end="opacity-0 transform scale-95">
+                
+                <!-- Icon -->
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-trash-alt text-red-600 text-xl"></i>
+                </div>
+                
+                <!-- Title -->
+                <h3 class="text-lg font-medium text-gray-900 mb-2">
+                    Hapus Transaksi
+                </h3>
+                
+                <!-- Description -->
+                <p class="text-sm text-gray-500 mb-6">
+                    Apakah Anda yakin ingin menghapus transaksi ini? Tindakan ini tidak dapat dibatalkan.
+                </p>
+                
+                <!-- Buttons -->
+                <div class="flex space-x-3">
+                    <button 
+                        wire:click="cancelDelete"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                        Batal
+                    </button>
+                    <button 
+                        wire:click="deleteTransaction"
+                        class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
 </div>

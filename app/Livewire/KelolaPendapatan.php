@@ -56,6 +56,10 @@ class KelolaPendapatan extends Component
     //modals
     public $isNotificationModalOpen = false;
 
+    // Properties for delete transaction feature
+    public $showDeleteModal = false;
+    public $transactionToDelete = null;
+
 
     public function updatedPerPage()
     {
@@ -229,31 +233,32 @@ class KelolaPendapatan extends Component
             $this->membershipTotal = 0;
             return;
         }
+
         $memberType = $this->member_type ?: $this->selectedMemberData->member_type;
 
-        if ($memberType === 'local') {
-            $this->membershipTotal = Setting::get('base_monthly_membership_fee', 0);
-        } elseif ($memberType === 'foreign' && $this->duration_membership) {
+        // Untuk local dan foreign sekarang sama-sama perlu memilih durasi
+        if (($memberType === 'local' || $memberType === 'foreign') && $this->duration_membership) {
 
-            // Use fixed prices instead of percentage calculation
+            $prefix = $memberType === 'local' ? 'local_membership_' : 'foreign_membership_';
+
             switch ($this->duration_membership) {
                 case 'one_week':
-                    $this->membershipTotal = Setting::get('foreign_membership_1_week', 0);
+                    $this->membershipTotal = Setting::get($prefix . '1_week', 0);
                     break;
                 case 'two_weeks':
-                    $this->membershipTotal = Setting::get('foreign_membership_2_weeks', 0);
+                    $this->membershipTotal = Setting::get($prefix . '2_weeks', 0);
                     break;
                 case 'three_weeks':
-                    $this->membershipTotal = Setting::get('foreign_membership_3_weeks', 0);
+                    $this->membershipTotal = Setting::get($prefix . '3_weeks', 0);
                     break;
                 case 'one_month':
-                    $this->membershipTotal = Setting::get('foreign_membership_1_month', 0);
+                    $this->membershipTotal = Setting::get($prefix . '1_month', 0);
                     break;
                 default:
                     $this->membershipTotal = 0;
             }
         } else {
-            $this->membershipTotal = 0; // Tidak valid atau tidak ada member type
+            $this->membershipTotal = 0; // Tidak valid atau tidak ada member type/duration
         }
     }
 
@@ -331,6 +336,7 @@ class KelolaPendapatan extends Component
             'transaction_type' => 'required',
             'selectedMember' => 'required_if:transaction_type,membership_payment',
             'member_type' => 'required_if:transaction_type,membership_payment',
+            'duration_membership' => 'required_if:transaction_type,membership_payment',
             'selectedProducts' => 'required_if:transaction_type,additional_items_sale|array',
             'visitor_type' => 'required_if:transaction_type,daily_visit_fee',
             'description' => 'required_if:transaction_type,daily_visit_fee',
@@ -399,26 +405,27 @@ class KelolaPendapatan extends Component
 
             // Update member status
             if ($this->transaction_type === 'membership_payment') {
+                $membershipStartDate = Carbon::now();
+                $membershipExpiredDate = null;
 
-                if ($this->member_type === 'foreign') {
-                    $membershipStartDate = Carbon::now();
-                    $membershipExpiredDate = null;
-
-                    if ($this->duration_membership === 'one_week') {
+                // Logika yang sama untuk local dan foreign berdasarkan durasi yang dipilih
+                switch ($this->duration_membership) {
+                    case 'one_week':
                         $membershipExpiredDate = $membershipStartDate->copy()->addWeek();
-                    } elseif ($this->duration_membership === 'two_weeks') {
+                        break;
+                    case 'two_weeks':
                         $membershipExpiredDate = $membershipStartDate->copy()->addWeeks(2);
-                    } elseif ($this->duration_membership === 'three_weeks') {
+                        break;
+                    case 'three_weeks':
                         $membershipExpiredDate = $membershipStartDate->copy()->addWeeks(3);
-                    } elseif ($this->duration_membership === 'one_month') {
+                        break;
+                    case 'one_month':
                         $membershipExpiredDate = $membershipStartDate->copy()->addMonth();
-                    }
-                } elseif ($this->member_type === 'local') {
-                    $membershipStartDate = Carbon::now();
-                    $membershipExpiredDate = Carbon::now()->addMonth();
-                } else {
-                    $membershipStartDate = null;
-                    $membershipExpiredDate = null;
+                        break;
+                    default:
+                        // Fallback ke 1 bulan jika durasi tidak valid
+                        $membershipExpiredDate = $membershipStartDate->copy()->addMonth();
+                        break;
                 }
 
                 User::where('id', $this->selectedMember)->update([
@@ -494,5 +501,81 @@ class KelolaPendapatan extends Component
             'title' => 'Refresh Berhasil',
             'description' => 'Data transaksi berhasil diperbarui.',
         ]);
+    }
+
+    // ✅ TAMBAHAN: Methods untuk delete transaction
+    public function confirmDeleteTransaction($transactionId)
+    {
+        $this->transactionToDelete = $transactionId;
+        $this->showDeleteModal = true;
+    }
+
+    public function cancelDelete()
+    {
+        $this->showDeleteModal = false;
+        $this->transactionToDelete = null;
+    }
+
+    public function deleteTransaction()
+    {
+        try {
+            if (!$this->transactionToDelete) {
+                session()->flash('message', [
+                    'type' => 'error',
+                    'title' => 'Gagal Menghapus',
+                    'description' => 'Transaksi tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            $transaction = Transaction::find($this->transactionToDelete);
+
+            if (!$transaction) {
+                session()->flash('message', [
+                    'type' => 'error',
+                    'title' => 'Gagal Menghapus',
+                    'description' => 'Transaksi tidak ditemukan.',
+                ]);
+                return;
+            }
+
+            DB::beginTransaction();
+
+            // Delete related transaction items if exists
+            TransactionItem::where('transaction_id', $transaction->id)->delete();
+
+            // Delete the main transaction
+            $transaction->delete();
+
+            DB::commit();
+
+            // Reload data
+            $this->loadTodayTotals();
+            $this->resetPage();
+
+            // Close modal
+            $this->showDeleteModal = false;
+            $this->transactionToDelete = null;
+
+            session()->flash('message', [
+                'type' => 'success',
+                'title' => 'Berhasil Dihapus',
+                'description' => 'Transaksi berhasil dihapus dari sistem.',
+            ]);
+
+            $this->isNotificationModalOpen = true;
+        } catch (\Exception $e) {
+            DB::rollback();
+
+            Log::error('Delete transaction failed: ' . $e->getMessage());
+
+            session()->flash('message', [
+                'type' => 'error',
+                'title' => 'Gagal Menghapus',
+                'description' => 'Terjadi kesalahan saat menghapus transaksi: ' . $e->getMessage(),
+            ]);
+
+            $this->isNotificationModalOpen = true;
+        }
     }
 }
