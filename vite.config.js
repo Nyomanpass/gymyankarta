@@ -11,18 +11,18 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
-    server: {
-        cors: true,
-        host: "0.0.0.0",
-        port: 5173,
-        https: {
-            key: fs.readFileSync("ssl/vite.key"),
-            cert: fs.readFileSync("ssl/vite.crt"),
-        },
-        hmr: {
-            host: process.env.VITE_DEV_SERVER_HOST || "10.166.193.237",
-            protocol: "wss",
-            port: 5173,
-        },
-    },
+    // server: {
+    //     cors: true,
+    //     host: "0.0.0.0",
+    //     port: 5173,
+    //     https: {
+    //         key: fs.readFileSync("ssl/vite.key"),
+    //         cert: fs.readFileSync("ssl/vite.crt"),
+    //     },
+    //     hmr: {
+    //         host: process.env.VITE_DEV_SERVER_HOST || "192.168.110.234",
+    //         protocol: "wss",
+    //         port: 5173,
+    //     },
+    // },
 });

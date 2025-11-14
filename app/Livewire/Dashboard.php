@@ -53,34 +53,32 @@ class Dashboard extends Component
     private function loadFinancialSummary()
     {
         $today = Carbon::today();
-        $thisMonth = Carbon::now()->month;
-        $thisYear = Carbon::now()->year;
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+        $startOfYear = Carbon::now()->startOfYear();
+        $endOfYear = Carbon::now()->endOfYear();
 
         // Pendapatan hari ini
         $this->todayRevenue = Transaction::whereDate('transaction_datetime', $today)
             ->sum('total_amount');
 
         // Pendapatan bulan ini
-        $this->thisMonthRevenue = Transaction::whereMonth('transaction_datetime', $thisMonth)
-            ->whereYear('transaction_datetime', $thisYear)
+        $this->thisMonthRevenue = Transaction::whereBetween('transaction_datetime', [$startOfMonth, $endOfMonth])
             ->sum('total_amount');
 
         // Pendapatan tahun ini
-        $this->thisYearRevenue = Transaction::whereYear('transaction_datetime', $thisYear)
+        $this->thisYearRevenue = Transaction::whereBetween('transaction_datetime', [$startOfYear, $endOfYear])
             ->sum('total_amount');
 
         // Breakdown pendapatan bulan ini by type
         $this->revenueByType = [
-            'membership' => Transaction::whereMonth('transaction_datetime', $thisMonth)
-                ->whereYear('transaction_datetime', $thisYear)
+            'membership' => Transaction::whereBetween('transaction_datetime', [$startOfMonth, $endOfMonth])
                 ->where('transaction_type', 'membership_payment')
                 ->sum('total_amount'),
-            'daily_visit' => Transaction::whereMonth('transaction_datetime', $thisMonth)
-                ->whereYear('transaction_datetime', $thisYear)
+            'daily_visit' => Transaction::whereBetween('transaction_datetime', [$startOfMonth, $endOfMonth])
                 ->where('transaction_type', 'daily_visit_fee')
                 ->sum('total_amount'),
-            'products' => Transaction::whereMonth('transaction_datetime', $thisMonth)
-                ->whereYear('transaction_datetime', $thisYear)
+            'products' => Transaction::whereBetween('transaction_datetime', [$startOfMonth, $endOfMonth])
                 ->where('transaction_type', 'additional_items_sale')
                 ->sum('total_amount'),
         ];
@@ -158,11 +156,10 @@ class Dashboard extends Component
 
     private function loadMonthlyRevenue()
     {
-        // Monthly revenue chart data
-        // Menggunakan YEAR() dan MONTH() untuk MySQL
-        $rawData = Transaction::selectRaw("MONTH(transaction_datetime) as month, SUM(total_amount) as total")
-            ->whereRaw("YEAR(transaction_datetime) = ?", [now()->format('Y')])
-            ->groupByRaw("MONTH(transaction_datetime)")
+        // Monthly revenue chart data - SQLite compatible
+        $rawData = Transaction::selectRaw("CAST(strftime('%m', transaction_datetime) AS INTEGER) as month, SUM(total_amount) as total")
+            ->whereRaw("strftime('%Y', transaction_datetime) = ?", [now()->format('Y')])
+            ->groupByRaw("CAST(strftime('%m', transaction_datetime) AS INTEGER)")
             ->pluck('total', 'month')
             ->mapWithKeys(fn($value, $key) => [(int)$key => $value])
             ->toArray();

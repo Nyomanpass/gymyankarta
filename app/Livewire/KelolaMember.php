@@ -307,6 +307,8 @@ class KelolaMember extends Component
                 'status' => $this->selectedStatus,
             ];
 
+
+
             if (!empty($this->editPassword)) {
                 $this->validate([
                     'editPassword' => 'required|string|min:8',
@@ -317,13 +319,16 @@ class KelolaMember extends Component
                 $updateData['password'] = Hash::make($this->editPassword);
             }
 
-            if ($this->selectedStatus === 'inactive') {
-                $updateData['membership_started_date'] = null;
-                $updateData['membership_expiration_date'] = null;
-            } elseif ($this->selectedStatus === 'active') {
-                $updateData['membership_started_date'] = now();
-                $updateData['membership_expiration_date'] = now()->addMonth();
-            }
+
+
+            //seharusnya data membership_started_date & expiration_date gaakan berubah kalo admin melakukan edit profil user 
+            // if ($this->selectedStatus === 'inactive') {
+            //     $updateData['membership_started_date'] = null;
+            //     $updateData['membership_expiration_date'] = null;
+            // } elseif ($this->selectedStatus === 'active') {
+            //     $updateData['membership_started_date'] = now();
+            //     $updateData['membership_expiration_date'] = now()->addMonth();
+            // }
 
             User::where('id', $this->memberDetail['id'])->update($updateData);
 
