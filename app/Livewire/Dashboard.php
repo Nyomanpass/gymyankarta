@@ -154,21 +154,25 @@ class Dashboard extends Component
             ->get();
     }
 
-    private function loadMonthlyRevenue()
-    {
-        // Monthly revenue chart data - SQLite compatible
-        $rawData = Transaction::selectRaw("CAST(strftime('%m', transaction_datetime) AS INTEGER) as month, SUM(total_amount) as total")
-            ->whereRaw("strftime('%Y', transaction_datetime) = ?", [now()->format('Y')])
-            ->groupByRaw("CAST(strftime('%m', transaction_datetime) AS INTEGER)")
-            ->pluck('total', 'month')
-            ->mapWithKeys(fn($value, $key) => [(int)$key => $value])
-            ->toArray();
+  private function loadMonthlyRevenue()
+{
+    $year = now()->year;
 
-        // Isi data untuk semua bulan (1–12), jika tidak ada isi 0
-        for ($i = 1; $i <= 12; $i++) {
-            $this->monthlyRevenue[] = $rawData[$i] ?? 0;
-        }
+    // Monthly revenue chart data - MySQL compatible
+    $rawData = Transaction::selectRaw("MONTH(transaction_datetime) as month, SUM(total_amount) as total")
+        ->whereYear('transaction_datetime', $year)
+        ->groupByRaw("MONTH(transaction_datetime)")
+        ->pluck('total', 'month')
+        ->mapWithKeys(fn($value, $key) => [(int)$key => $value])
+        ->toArray();
+
+    // Isi data untuk semua bulan (1–12), jika tidak ada isi 0
+    $this->monthlyRevenue = [];
+    for ($i = 1; $i <= 12; $i++) {
+        $this->monthlyRevenue[] = $rawData[$i] ?? 0;
     }
+}
+
 
     public function render()
     {
