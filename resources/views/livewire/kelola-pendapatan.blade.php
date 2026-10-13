@@ -504,68 +504,12 @@
             </div>
             
             <!-- Pagination Controls -->
-            @if($this->todayTransactions->hasPages())
-                <div class="bg-gray-50 px-4 py-3 border-t">
-                    <div class="flex items-center justify-between">
-                        <!-- Pagination Info -->
-                        <div class="text-sm text-gray-600">
-                            Showing {{ $this->todayTransactions->firstItem() }} to {{ $this->todayTransactions->lastItem() }} 
-                            of {{ $this->todayTransactions->total() }} results
-                        </div>
-                        
-                        <!-- Pagination Links -->
-                        <div class="flex items-center space-x-2">
-                            <!-- Previous Button -->
-                            @if ($this->todayTransactions->onFirstPage())
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </span>
-                            @else
-                                <button wire:click="previousPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </button>
-                            @endif
-                            
-                            <!-- Page Numbers -->
-                            @if($this->todayTransactions->lastPage() > 1)
-                                @for($i = 1; $i <= $this->todayTransactions->lastPage(); $i++)
-                                    @if($i == $this->todayTransactions->currentPage())
-                                        <span class="px-3 py-1 text-sm bg-warna-500 text-white rounded font-medium">
-                                            {{ $i }}
-                                        </span>
-                                    @else
-                                        <button wire:click="gotoPage({{ $i }})" 
-                                                class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                            {{ $i }}
-                                        </button>
-                                    @endif
-                                @endfor
-                            @endif
-                            
-                            <!-- Next Button -->
-                            @if ($this->todayTransactions->hasMorePages())
-                                <button wire:click="nextPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </button>
-                            @else
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+            <x-table-pagination :paginator="$this->todayTransactions" label="transaksi" />
             
             <!-- Summary Footer -->
             @if($todayTransactions->count() > 0)
                 <div class="bg-gray-50 px-4 py-3 border-t">
                     <div class="flex justify-between items-center text-sm">
-                        <span class="text-gray-600">
-                            Page {{ $todayTransactions->currentPage() }} of {{ $todayTransactions->lastPage() }}
-                        </span>
                         <span class="font-bold text-warna-600">
                             Total Hari Ini: Rp {{ number_format($totalToday ?? 0, 0, ',', '.') }}
                         </span>
@@ -934,6 +878,8 @@
                         </div>
                     @endforelse
                     
+                    <x-table-pagination :paginator="$todayTransactions" label="transaksi" instance="mobile" />
+
                     @if(count($todayTransactions ?? []) > 0)
                         <div class="bg-warna-50 rounded-lg p-3 mt-4">
                             <div class="flex justify-between items-center text-sm">

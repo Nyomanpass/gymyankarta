@@ -149,6 +149,7 @@ class KelolaPendapatan extends Component
         return Transaction::with(['user:id,name,email'])
             ->whereDate('transaction_datetime', today())
             ->orderBy('transaction_datetime', 'desc')
+            ->orderByDesc('id')
             ->paginate($this->perPage);
     }
 

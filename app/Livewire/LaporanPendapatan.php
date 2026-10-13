@@ -90,6 +90,7 @@ public function exportExcel()
             ->when($this->selectedYear, fn($q) => $q->whereYear('transaction_datetime', $this->selectedYear))
             ->when($this->selectedMonth, fn($q) => $q->whereMonth('transaction_datetime', $this->selectedMonth))
             ->orderBy('transaction_datetime', 'desc')
+            ->orderByDesc('id')
             ->paginate($this->perPage); // <= tambahkan ini
     }
 

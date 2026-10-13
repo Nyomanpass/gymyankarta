@@ -196,60 +196,7 @@
             </div>
 
             <!-- Enhanced Pagination Section -->
-             @if($newMembersThisMonth->hasPages())
-                <div class="bg-gray-50 px-4 py-3 border-t">
-                    <div class="flex items-center justify-between">
-                        <!-- Pagination Info -->
-                        <div class="text-sm text-gray-600">
-                            Showing {{ $newMembersThisMonth->firstItem() }} to {{ $newMembersThisMonth->lastItem() }} 
-                            of {{ $newMembersThisMonth->total() }} results
-                        </div>
-                        
-                        <!-- Pagination Links -->
-                        <div class="flex items-center space-x-2">
-                            <!-- Previous Button -->
-                            @if ($newMembersThisMonth->onFirstPage())
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </span>
-                            @else
-                                <button wire:click="previousPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </button>
-                            @endif
-                            
-                            <!-- Page Numbers -->
-                            @if($newMembersThisMonth->lastPage() > 1)
-                                @for($i = 1; $i <= $newMembersThisMonth->lastPage(); $i++)
-                                    @if($i == $newMembersThisMonth->currentPage())
-                                        <span class="px-3 py-1 text-sm bg-warna-500 text-white rounded font-medium">
-                                            {{ $i }}
-                                        </span>
-                                    @else
-                                        <button wire:click="gotoPage({{ $i }})" 
-                                                class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                            {{ $i }}
-                                        </button>
-                                    @endif
-                                @endfor
-                            @endif
-                            
-                            <!-- Next Button -->
-                            @if ($newMembersThisMonth->hasMorePages())
-                                <button wire:click="nextPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </button>
-                            @else
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+             <x-table-pagination :paginator="$newMembersThisMonth" label="member" />
        
     </div>
 
@@ -383,60 +330,7 @@
                 </div>
             </div>
 
-             @if($membersExpiringSoon->hasPages())
-                <div class="bg-gray-50 px-4 py-3 border-t">
-                    <div class="flex items-center justify-between">
-                        <!-- Pagination Info -->
-                        <div class="text-sm text-gray-600">
-                            Showing {{ $membersExpiringSoon->firstItem() }} to {{ $membersExpiringSoon->lastItem() }} 
-                            of {{ $membersExpiringSoon->total() }} results
-                        </div>
-                        
-                        <!-- Pagination Links -->
-                        <div class="flex items-center space-x-2">
-                            <!-- Previous Button -->
-                            @if ($membersExpiringSoon->onFirstPage())
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </span>
-                            @else
-                                <button wire:click="previousPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    <i class="fas fa-chevron-left mr-1"></i>Previous
-                                </button>
-                            @endif
-                            
-                            <!-- Page Numbers -->
-                            @if($membersExpiringSoon->lastPage() > 1)
-                                @for($i = 1; $i <= $membersExpiringSoon->lastPage(); $i++)
-                                    @if($i == $membersExpiringSoon->currentPage())
-                                        <span class="px-3 py-1 text-sm bg-warna-500 text-white rounded font-medium">
-                                            {{ $i }}
-                                        </span>
-                                    @else
-                                        <button wire:click="gotoPage({{ $i }})" 
-                                                class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                            {{ $i }}
-                                        </button>
-                                    @endif
-                                @endfor
-                            @endif
-                            
-                            <!-- Next Button -->
-                            @if ($membersExpiringSoon->hasMorePages())
-                                <button wire:click="nextPage" 
-                                        class="px-3 py-1 text-sm text-gray-600 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </button>
-                            @else
-                                <span class="px-3 py-1 text-sm text-gray-400 bg-gray-100 rounded cursor-not-allowed">
-                                    Next<i class="fas fa-chevron-right ml-1"></i>
-                                </span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endif
+             <x-table-pagination :paginator="$membersExpiringSoon" label="member" />
        
     </div>
 

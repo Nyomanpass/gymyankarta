@@ -55,6 +55,16 @@ class LaporanMember extends Component
 
     
 
+    public function updatedPerPagememberbaru()
+    {
+        $this->resetPage('newMembersPage');
+    }
+
+    public function updatedPerPagbatas()
+    {
+        $this->resetPage('expiringPage');
+    }
+
     public function render()
     {
         $today = Carbon::today();
@@ -63,13 +73,15 @@ class LaporanMember extends Component
             ->whereNotNull('membership_expiration_date')
             ->whereBetween('membership_expiration_date', [$today, $today->copy()->addDays(7)])
             ->orderBy('membership_expiration_date', 'asc')
-            ->paginate($this->perPagbatas); // Gunakan paginate
+            ->orderBy('id')
+            ->paginate($this->perPagbatas, ['*'], 'expiringPage');
 
         $newMembersThisMonth = User::where('role', 'member')
             ->whereMonth('membership_started_date', now()->month)
             ->whereYear('membership_started_date', now()->year)
             ->orderBy('membership_started_date', 'desc')
-            ->paginate($this->perPagememberbaru); // Gunakan paginate
+            ->orderByDesc('id')
+            ->paginate($this->perPagememberbaru, ['*'], 'newMembersPage');
 
         return view('livewire.laporan-member', [
             'membersExpiringSoon' => $membersExpiringSoon,
