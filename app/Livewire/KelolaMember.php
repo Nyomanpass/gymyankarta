@@ -67,7 +67,7 @@ class KelolaMember extends Component
 
     //pagination propertiesw
     public $perPage = 10;
-    public $sortField = 'created_at';
+    public $sortField = 'membership_expiration_date';
     public $sortDirection = 'desc';
 
     protected $updateQueryString = [
@@ -75,7 +75,7 @@ class KelolaMember extends Component
         'filterMemberType' => ['except' => ''],
         'filterStatus' => ['except' => ''],
         'perPege' => ['except' => 10],
-        'sortField' => ['except' => 'created_at'],
+        'sortField' => ['except' => 'membership_expiration_date'],
         'sortDirection' => ['except' => 'desc'],
     ];
 
@@ -118,6 +118,7 @@ class KelolaMember extends Component
                 $query->where('status', $this->filterStatus);
             })
             ->orderBy($this->sortField, $this->sortDirection)
+            ->orderByDesc('id')
             ->paginate($this->perPage, ['*'], 'page');
     }
 

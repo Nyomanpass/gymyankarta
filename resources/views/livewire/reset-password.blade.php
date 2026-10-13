@@ -1,5 +1,5 @@
-<div class="max-w-md mx-auto bg-white p-6 rounded shadow">
-    <h2 class="text-xl font-bold mb-4">Reset Password</h2>
+<div class="max-w-xl bg-white p-6 sm:p-8 rounded-xl shadow">
+    <h2 class="text-xl font-bold mb-4">Ubah Password</h2>
 
     @if($isNotificationModalOpen)
      <div class="fixed z-50 inset-0 flex items-center justify-center bg-warna-300/50 ">

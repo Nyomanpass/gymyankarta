@@ -13,6 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->append(\App\Http\Middleware\PreventHtmlCaching::class);
+        $middleware->redirectUsersTo(fn (\Illuminate\Http\Request $request) =>
+            route($request->user()->role === 'admin' ? 'dashboard' : 'dashboard.member')
+        );
 
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,

@@ -1,48 +1,32 @@
 <div>
 <div class="pb-9 bg-gray-100">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Laporan Pendapatan</h1>
-        <div class="text-sm text-gray-600">Today: {{ date('d M Y, H:i') }}</div>
-    </div>
-
-
      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
                 
-                <div class="bg-gradient-to-r from-warna-400 to-warna-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-emerald-700 to-teal-800 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-warna-100 text-sm font-medium">Pendapatan Hari Ini</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($today ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-money-bill-wave text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Pendapatan Hari Ini</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($today ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 
-                <div class="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-sky-700 to-blue-800 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium">Bulan Ini</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($thisMonth ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-calendar-alt text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Bulan Ini</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($thisMonth ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 
-                <div class="bg-gradient-to-r from-green-400 to-green-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-orange-600 to-amber-700 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Total Semua</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($total ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-chart-line text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Total Semua</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($total ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>

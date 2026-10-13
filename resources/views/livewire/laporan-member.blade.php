@@ -1,84 +1,66 @@
 <div class="">
 
 <div class="bg-white shadow rounded-lg p-6 space-y-6">
-    <h2 class="text-2xl font-bold text-gray-700">Laporan Member Gym</h2>
+    <h2 class="text-2xl font-bold text-gray-700">Ringkasan Membership</h2>
 
     <!-- Status Member -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         <!-- Aktif -->
-        <div class="bg-gradient-to-r from-green-500 to-green-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-emerald-700 to-teal-800 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-green-100">Member Aktif</p>
-                    <p class="text-2xl font-bold">{{ $totalActive }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-user-check text-xl"></i>
+                    <p class="text-sm text-white/85">Member Aktif</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalActive }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Frozen -->
-        <div class="bg-gradient-to-r from-yellow-500 to-yellow-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-amber-700 to-yellow-800 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-yellow-100">Member Frozen</p>
-                    <p class="text-2xl font-bold">{{ $totalFrozen }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-user-clock text-xl"></i>
+                    <p class="text-sm text-white/85">Member Frozen</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalFrozen }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Inactive -->
-        <div class="bg-gradient-to-r from-red-500 to-red-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-rose-700 to-red-800 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-red-100">Tidak Aktif</p>
-                    <p class="text-2xl font-bold">{{ $totalInactive }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-user-slash text-xl"></i>
+                    <p class="text-sm text-white/85">Tidak Aktif</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalInactive }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Lokal -->
-        <div class="bg-gradient-to-r from-blue-500 to-blue-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-sky-700 to-blue-800 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-blue-100">Member Lokal</p>
-                    <p class="text-2xl font-bold">{{ $totalLocal }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-flag text-xl"></i>
+                    <p class="text-sm text-white/85">Member Lokal</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalLocal }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Asing -->
-        <div class="bg-gradient-to-r from-purple-500 to-purple-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-violet-700 to-purple-800 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-purple-100">Member Asing</p>
-                    <p class="text-2xl font-bold">{{ $totalForeign }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-globe text-xl"></i>
+                    <p class="text-sm text-white/85">Member Asing</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalForeign }}</p>
                 </div>
             </div>
         </div>
 
         <!-- Pending Admin -->
-        <div class="bg-gradient-to-r from-pink-500 to-pink-400 text-white p-6 rounded-xl shadow-lg">
-            <div class="flex items-center justify-between">
+        <div class="min-w-0 bg-linear-to-br from-orange-600 to-amber-700 text-white p-6 rounded-2xl shadow-sm">
+            <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-sm text-pink-100">Pending Verifikasi</p>
-                    <p class="text-2xl font-bold">{{ $totalPendingAdmin }}</p>
-                </div>
-                <div class="bg-white/20 p-3 rounded-full">
-                    <i class="fas fa-user-shield text-xl"></i>
+                    <p class="text-sm text-white/85">Pending Verifikasi</p>
+                    <p class="mt-3 text-2xl font-bold tracking-tight break-words">{{ $totalPendingAdmin }}</p>
                 </div>
             </div>
         </div>

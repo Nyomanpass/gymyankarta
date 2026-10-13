@@ -47,12 +47,13 @@
                 @endif
             </div>
             <form wire:submit.prevent="save" class="space-y-5">
-                <x-g-input 
-                    id="transaction_type"
+                <x-cashier-select model="transaction_type"
+                    :descriptions="[
+                        'membership_payment' => 'Daftar atau perpanjang paket membership.',
+                        'daily_visit_fee' => 'Bayar kunjungan gym untuk satu hari.',
+                        'additional_items_sale' => 'Pembelian produk tambahan di kasir.',
+                    ]"
                     label="Tipe Transaksi"
-                    type="select"
-                    name="transaction_type"
-                    wire:model.live="transaction_type"
                     :options="[
                         'membership_payment' => 'Pembayaran Membership',
                         'daily_visit_fee' => 'Pengunjung Harian', 
@@ -82,11 +83,8 @@
 
                         <!-- Member Type (muncul jika member belum punya member_type) -->
                         @if(!$selectedMemberData->member_type)
-                            <x-g-input 
+                            <x-cashier-select model="member_type"
                                 label="Jenis Member"
-                                type="select"
-                                name="member_type"
-                                wire:model.live="member_type"
                                 :options="$memberTypeOptions"
                                 
                             />
@@ -102,11 +100,8 @@
 
                         <!-- Durasi Membership (muncul untuk semua member type) -->
                         @if($member_type || $selectedMemberData->member_type)
-                            <x-g-input 
+                            <x-cashier-select model="duration_membership"
                                 label="Durasi Keanggotaan"
-                                type="select"
-                                name="duration_membership"
-                                wire:model.live="duration_membership"
                                 :options="$durationOptions"
                             />
                         @endif
@@ -158,11 +153,8 @@
                         @endforelse
                     </div>
                 @elseif($transaction_type === 'daily_visit_fee')
-                    <x-g-input 
+                    <x-cashier-select model="visitor_type"
                         label="Tipe Pengunjung"
-                        type="select"
-                        name="visitor_type"
-                        wire:model.live="visitor_type"
                         :options="[
                             'local' => 'Local',
                             'foreign' => 'Foreign'
@@ -177,11 +169,8 @@
                     
                 />
 
-                <x-g-input 
+                <x-cashier-select model="payment_method"
                     label="Metode Pembayaran"
-                    type="select"
-                    name="payment_method"
-                    wireModel="payment_method"
                     :options="[
                         'cash' => 'Tunai',
                         'qris' => 'QRIS',
@@ -372,40 +361,31 @@
             <h3 class="text-lg font-semibold mb-6 ">Total Transaksi Hari Ini</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Total Keseluruhan -->
-                <div class="bg-gradient-to-r from-warna-400 to-warna-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-orange-600 to-amber-700 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-warna-100 text-sm font-medium">Total Keseluruhan</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($totalToday ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-chart-line text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Total Keseluruhan</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($totalToday ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Total Membership -->
-                <div class="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-emerald-700 to-teal-800 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-blue-100 text-sm font-medium">Membership</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($membershipToday ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-users text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Membership</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($membershipToday ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Total Produk & Harian -->
-                <div class="bg-gradient-to-r from-green-400 to-green-500 text-white p-6 rounded-xl shadow-lg">
-                    <div class="flex items-center justify-between">
+                <div class="min-w-0 bg-linear-to-br from-sky-700 to-blue-800 text-white p-6 rounded-2xl shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <p class="text-green-100 text-sm font-medium">Produk & Harian</p>
-                            <p class="text-2xl font-bold">Rp {{ number_format($otherToday ?? 0, 0, ',', '.') }}</p>
-                        </div>
-                        <div class="bg-white/20 p-3 rounded-full">
-                            <i class="fas fa-shopping-cart text-xl"></i>
+                            <p class="text-white/85 text-sm font-medium">Produk & Harian</p>
+                            <p class="mt-3 text-2xl font-bold tracking-tight break-words">Rp {{ number_format($otherToday ?? 0, 0, ',', '.') }}</p>
                         </div>
                     </div>
                 </div>
@@ -853,10 +833,10 @@
                     <h3 class="text-lg font-semibold mb-4 text-warna-700">Total Transaksi Hari Ini</h3>
                     <div class="grid grid-cols-1 gap-3">
                         <!-- Total Keseluruhan -->
-                        <div class="bg-gradient-to-r from-warna-400 to-warna-500 text-white p-4 rounded-lg shadow">
-                            <div class="flex items-center justify-between">
+                        <div class="min-w-0 bg-linear-to-br from-orange-600 to-amber-700 text-white p-4 rounded-2xl shadow-sm">
+                            <div class="flex items-start justify-between gap-3">
                                 <div>
-                                    <p class="text-warna-100 text-xs font-medium">Total Keseluruhan</p>
+                                    <p class="text-white/85 text-xs font-medium">Total Keseluruhan</p>
                                     <p class="text-lg font-bold">Rp {{ number_format($totalToday ?? 0, 0, ',', '.') }}</p>
                                 </div>
                                 <div class="bg-white/20 p-2 rounded-full">
@@ -867,19 +847,17 @@
 
                         <!-- Membership & Lainnya dalam satu baris -->
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="bg-gradient-to-r from-blue-400 to-blue-500 text-white p-4 rounded-lg shadow">
+                            <div class="min-w-0 bg-linear-to-br from-emerald-700 to-teal-800 text-white p-4 rounded-2xl shadow-sm">
                                 <div class="text-center">
-                                    <p class="text-blue-100 text-xs font-medium">Membership</p>
-                                    <p class="text-sm font-bold">Rp {{ number_format($membershipToday ?? 0, 0, ',', '.') }}</p>
-                                    <i class="fas fa-users text-xs mt-1"></i>
+                                    <p class="text-white/85 text-xs font-medium">Membership</p>
+                                    <p class="mt-2 text-sm font-bold break-words">Rp {{ number_format($membershipToday ?? 0, 0, ',', '.') }}</p>
                                 </div>
                             </div>
 
-                            <div class="bg-gradient-to-r from-green-400 to-green-500 text-white p-4 rounded-lg shadow">
+                            <div class="min-w-0 bg-linear-to-br from-sky-700 to-blue-800 text-white p-4 rounded-2xl shadow-sm">
                                 <div class="text-center">
-                                    <p class="text-green-100 text-xs font-medium">Produk & Harian</p>
-                                    <p class="text-sm font-bold">Rp {{ number_format($otherToday ?? 0, 0, ',', '.') }}</p>
-                                    <i class="fas fa-shopping-cart text-xs mt-1"></i>
+                                    <p class="text-white/85 text-xs font-medium">Produk & Harian</p>
+                                    <p class="mt-2 text-sm font-bold break-words">Rp {{ number_format($otherToday ?? 0, 0, ',', '.') }}</p>
                                 </div>
                             </div>
                         </div>

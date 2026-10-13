@@ -1,139 +1,40 @@
-<div>
-    <div class="bg-white p-6 rounded-lg">
-        <h2 class="text-xl font-semibold mb-8 md:mb-10">Pengaturan Harga Operasional</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
-            <div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="harga_pengunjung_harian"
-                        wire:model.live="harga_pengunjung_harian"
-                        label="Harga Pengunjung Harian (Local)"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="harga_pengunjung_harian_foreign"
-                        wire:model.live="harga_pengunjung_harian_foreign"
-                        label="Harga Pengunjung Harian (Foreign)"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-            </div>
-            
+<div class="space-y-7">
+    @php
+        $priceGroups = [
+            ['Kunjungan harian', 'Tarif sekali kunjungan, tanpa paket membership.', 'bg-orange-50 border-orange-200', [
+                'harga_pengunjung_harian' => 'Member lokal', 'harga_pengunjung_harian_foreign' => 'Member asing',
+            ]],
+            ['Membership lokal', 'Harga paket berdasarkan durasi untuk member lokal.', 'bg-emerald-50 border-emerald-200', [
+                'local_1_week' => '1 Minggu', 'local_2_weeks' => '2 Minggu', 'local_3_weeks' => '3 Minggu', 'local_1_month' => '1 Bulan',
+            ]],
+            ['Membership asing', 'Harga paket berdasarkan durasi untuk member asing.', 'bg-sky-50 border-sky-200', [
+                'foreign_1_week' => '1 Minggu', 'foreign_2_weeks' => '2 Minggu', 'foreign_3_weeks' => '3 Minggu', 'foreign_1_month' => '1 Bulan',
+            ]],
+        ];
+    @endphp
+    <section class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="p-5 sm:p-7 border-b border-gray-100 flex flex-wrap justify-between gap-3 items-start">
+            <div><h2 class="text-lg font-semibold">Tarif & Membership</h2><p class="text-sm text-warna-200 mt-1">Sesuaikan tarif gym, lalu simpan perubahan Anda.</p></div>
+            <span class="rounded-full bg-gray-50 border border-gray-200 px-3 py-1.5 text-xs text-warna-200">Mata uang · IDR</span>
         </div>
-
-        <div class="mt-8">
-            <h3 class="text-lg font-semibold mb-6">Harga Membership Local</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="local_1_week"
-                        wire:model.live="local_1_week"
-                        label="1 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="local_2_weeks"
-                        wire:model.live="local_2_weeks"
-                        label="2 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="local_3_weeks"
-                        wire:model.live="local_3_weeks"
-                        label="3 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="local_1_month"
-                        wire:model.live="local_1_month"
-                        label="1 Bulan"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-            </div>
+        <div class="divide-y divide-gray-100">
+            @foreach($priceGroups as [$title, $description, $accent, $fields])
+                <section class="grid grid-cols-1 xl:grid-cols-[240px_minmax(0,1fr)] gap-6 p-5 sm:p-7" wire:key="price-group-{{ $loop->index }}">
+                    <div><span class="inline-block border rounded-lg px-3 py-1.5 text-xs font-semibold {{ $accent }}">{{ $title }}</span><p class="mt-3 text-sm text-warna-200 leading-relaxed">{{ $description }}</p></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-5 gap-y-6">
+                        @foreach($fields as $field => $label)
+                            <div wire:key="price-field-{{ $field }}">
+                                <label for="{{ $field }}" class="block text-sm font-medium mb-2">{{ $label }}</label>
+                                <div class="relative"><span class="absolute left-4 inset-y-0 flex items-center text-sm text-warna-200 pointer-events-none">Rp</span><input id="{{ $field }}" type="number" min="0" step="any" inputmode="decimal" wire:model.live.debounce.300ms="{{ $field }}" class="w-full border border-gray-200 bg-gray-50/50 pl-12 pr-4 py-3 rounded-xl" @error($field) aria-invalid="true" aria-describedby="error-{{ $field }}" @enderror></div>
+                                @error($field)<p id="error-{{ $field }}" class="text-xs text-red-600 mt-2">{{ $message }}</p>@enderror
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
         </div>
-
-        <div class="mt-8">
-            <h3 class="text-lg font-semibold mb-6">Harga Membership Foreign</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="foreign_1_week"
-                        wire:model.live="foreign_1_week"
-                        label="1 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="foreign_2_weeks"
-                        wire:model.live="foreign_2_weeks"
-                        label="2 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="foreign_3_weeks"
-                        wire:model.live="foreign_3_weeks"
-                        label="3 Minggu"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-                <div class="relative">
-                    <span class="absolute z-10 left-3 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                    <x-g-input 
-                        type="number"
-                        id="foreign_1_month"
-                        wire:model.live="foreign_1_month"
-                        label="1 Bulan"
-                        class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0"
-                    />
-                </div>
-            </div>
-        </div>
-
-        <div class="mt-6 flex justify-end">
+        <div class="p-5 sm:px-7 border-t border-gray-100 bg-gray-50/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <p class="text-xs text-warna-200 leading-relaxed">Perubahan tarif diterapkan setelah disimpan.</p>
             <button type="button" 
                 wire:click="saveSettings"
                 wire:loading.attr="disabled"
@@ -150,96 +51,43 @@
                     $local_2_weeks == $original_local_2_weeks && 
                     $local_3_weeks == $original_local_3_weeks && 
                     $local_1_month == $original_local_1_month) ? 'disabled' : '' }}
-                class="w-full md:w-max bg-warna-700 hover:bg-warna-700/80 text-white font-medium py-3 px-6 rounded-lg transition duration-200 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+                class="w-full md:w-max bg-warna-400 hover:bg-warna-500 text-white font-medium py-3 px-6 rounded-lg transition duration-200 text-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
                 
                 <span wire:loading.remove wire:target="saveSettings">Simpan Pengaturan</span>
                 <span wire:loading wire:target="saveSettings">
-                    <i class="fas fa-spinner fa-spin mr-2"></i>
+
                     Menyimpan...
                 </span>
             </button>
-        </div>
-    </div>
 
-    <div class="bg-white p-6 rounded-lg mt-10">
-        <h2 class="text-xl font-semibold mb-8 md:mb-10">Pengaturan Harga Produk</h2>
-        <div class="grid grid-cols-1 sm:mx-5 md:mx-0 md:grid-cols-3 xl:grid-cols-4 gap-6">
-            @forelse ($products as $item)
-                <div class="aspect-square  md:aspect-4/5 xl:aspect-auto bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col">
-                    <div class="relative mb-2 flex-shrink-0">
-                        @if($item->is_available == false)
-                            <div class="absolute inset-0 bg-warna-300/50 rounded-lg  flex items-center justify-center text-warna-50 font-medium text-sm text-center ">Barang dinonaktifkan</div>
-                        @endif
-                        <img src="/storage/{{ $item->image }}" alt="Gambar {{ $item->name }}" class="w-full h-20 sm:h-32 md:h-25 lg:h-24 object-cover rounded-lg bg-gray-200">
-                        <div class="absolute top-1 right-1">
-                            <button type="button" 
-                                    wire:click="toggleAvailableProduct({{ $item->id }})"
-                                    class="{{ $item->is_available ? 'bg-warna-900 hover:bg-warna-900/80' : 'bg-warna-700 hover:bg-warna-700/80' }} text-white text-xs px-1.5 py-1 rounded-full transition duration-200"
-                                    title="{{ $item->is_available ? 'Nonaktifkan Produk' : 'Aktifkan Produk' }}">
-                                <i class="fas {{ $item->is_available ? 'fa-times' : 'fa-check' }} text-xs"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1 flex flex-col justify-between min-h-0">
-                        <div>
-                            <h3 class="text-xs md:text-sm font-semibold text-gray-800 mb-1 line-clamp-2">{{ $item->name }}</h3>
-                            
-                            @if($item->description)
-                                <p class="text-xs text-gray-500 mb-2 line-clamp-1">{{ $item->description }}</p>
-                            @endif
-                        </div>
-                        
-                        <div class="space-y-2">
-                            <div class="relative">
-                                <span class="absolute z-10 left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">Rp</span>
-                                <input 
-                                    type="number"
-                                    id="harga_produk_{{ $item->id }}"
-                                    wire:model.live="harga_produk.{{ $item->id }}"
-                                    class="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    placeholder="0"
-                                    min="0"
-                                />
-                            </div>
-                            
-                            {{-- Tombol Simpan (muncul jika ada perubahan) --}}
-                                <div class="flex gap-1">
-                                    <button type="button"
-                                            {{ $harga_produk[$item->id] != $item->price ? '' : 'disabled' }}
-                                            wire:click="updateProductPrice({{ $item->id }})"
-                                            class="flex-1 bg-warna-700 hover:bg-warna-700/80 text-white text-xs font-medium py-2 px-2 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
-                                        <i class="fas fa-save mr-1"></i>
-                                        Simpan
-                                    </button>
-                                    <button type="button" 
-                                            {{ $harga_produk[$item->id] == $item->price ? 'disabled' : '' }}
-                                            wire:click="resetProductPrice({{ $item->id }})"
-                                            class="bg-gray-400 hover:bg-gray-500 text-white text-xs font-medium py-1.5 px-2 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            title="Reset ke harga asli">
-                                        <i class="fas fa-undo"></i>
-                                    </button>
-                                </div>
-                        </div>
-                    </div>
-                </div>
-            @empty
-                <div class="bg-gray-50 border border-dashed border-gray-300  aspect-square h-auto flex items-center justify-center">
-                    <p class="text-gray-500">Tidak ada produk</p>
-                </div>
-            @endforelse
-            <div class="aspect-square  md:aspect-4/5 xl:aspect-auto bg-gray-50 p-4 rounded-lg border flex items-center justify-center group hover:bg-gray-100 transition duration-200 active:scale-95 cursor-pointer">
-                <button type="button" 
-                        wire:click="toggleInputModal"
-                        class="text-gray-500 hover:text-gray-700 transition duration-200 text-sm md:text-base w-full h-full">
-                        <div class="flex flex-col items-center gap-2">
-                            <i class="fas fa-plus"></i>
-                            <span>Tambah Produk</span>
-                        </div>
-                </button>
-            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+        <div class="p-5 sm:p-7 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div><h2 class="text-lg font-semibold">Katalog Produk</h2><p class="text-sm text-warna-200 mt-1">Atur harga dan ketersediaan produk yang dijual di kasir.</p></div>
+            <button type="button" wire:click="toggleInputModal" class="bg-warna-400 hover:bg-warna-500 text-white text-sm font-semibold px-5 py-3 rounded-xl">Tambah Produk</button>
+        </div>
+        <div class="p-5 sm:p-7 grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-5">
+            @forelse($products as $item)
+                <article wire:key="price-product-{{ $item->id }}" class="border border-gray-200 rounded-2xl p-5 space-y-5">
+                    <div class="flex items-start gap-4">
+                        @if($item->image)
+                            <img src="{{ asset('storage/'.$item->image) }}" alt="{{ $item->name }}" class="h-20 w-20 shrink-0 rounded-xl object-cover bg-gray-50">
+                        @else
+                            <div class="h-20 w-20 shrink-0 rounded-xl bg-orange-50 text-orange-700 flex items-center justify-center text-xl font-semibold" aria-hidden="true">{{ strtoupper(substr($item->name, 0, 1)) }}</div>
+                        @endif
+                        <div class="min-w-0"><h3 class="text-sm font-semibold break-words">{{ $item->name }}</h3><span class="inline-block mt-2 text-xs rounded-full px-2.5 py-1 {{ $item->is_available ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-600' }}">{{ $item->is_available ? 'Tersedia' : 'Nonaktif' }}</span>@if($item->description)<p class="text-xs text-warna-200 mt-2 line-clamp-2">{{ $item->description }}</p>@endif</div>
+                    </div>
+                    <div><label for="harga_produk_{{ $item->id }}" class="block text-xs font-medium text-warna-200 mb-2">Harga jual</label><div class="relative"><span class="absolute left-3 inset-y-0 flex items-center text-sm text-warna-200 pointer-events-none">Rp</span><input type="number" min="0" step="any" id="harga_produk_{{ $item->id }}" wire:model.live.debounce.300ms="harga_produk.{{ $item->id }}" class="w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl"></div>@error('harga_produk.'.$item->id)<p class="text-xs text-red-600 mt-2">{{ $message }}</p>@enderror</div>
+                    <div class="flex gap-2"><button type="button" wire:click="updateProductPrice({{ $item->id }})" wire:loading.attr="disabled" @disabled($harga_produk[$item->id] == $original_price[$item->id]) class="flex-1 bg-warna-400 hover:bg-warna-500 text-white font-medium text-sm py-2.5 rounded-xl disabled:opacity-40">Simpan harga</button><button type="button" wire:click="resetProductPrice({{ $item->id }})" @disabled($harga_produk[$item->id] == $original_price[$item->id]) class="border border-gray-200 text-sm px-4 py-2.5 rounded-xl disabled:opacity-40">Batal</button></div>
+                    <div class="border-t border-gray-100 pt-3"><button type="button" wire:click="toggleAvailableProduct({{ $item->id }})" wire:loading.attr="disabled" class="text-xs font-medium {{ $item->is_available ? 'text-warna-200 hover:text-red-600' : 'text-emerald-700' }}">{{ $item->is_available ? 'Nonaktifkan produk' : 'Aktifkan produk' }}</button></div>
+                </article>
+            @empty
+                <div class="col-span-full text-center py-12 rounded-xl border border-dashed border-gray-200"><h3 class="text-sm font-semibold">Belum ada produk</h3><p class="text-sm text-warna-200 mt-2">Tambahkan produk pertama untuk mengatur harga jualnya.</p></div>
+            @endforelse
+        </div>
+    </section>
 
     <!--modals-->
     @if($isInputModalOpen)

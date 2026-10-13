@@ -40,6 +40,7 @@ class Login extends Component
         if ($user && Hash::check($this->password, $user->password)) {
             if ($user->status === 'active' || $user->status === 'frozen') {
                 Auth::login($user);
+                session()->regenerate();
                 if ($user->role === 'admin') {
                     return redirect()->route('dashboard');
                 } else {
@@ -62,6 +63,8 @@ class Login extends Component
     public function logout()
     {
         Auth::logout();
+        session()->invalidate();
+        session()->regenerateToken();
         session()->flash('message', 'Anda telah berhasil keluar.');
         return redirect()->route('login');
     }

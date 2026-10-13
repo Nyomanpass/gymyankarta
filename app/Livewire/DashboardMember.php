@@ -289,21 +289,8 @@ class DashboardMember extends Component
         $this->isProcessingAttendance = true;
 
         try {
-            // Decode QR data
-            $decodedData = json_decode(base64_decode($qrData), true);
-
-            if (!$decodedData || !isset($decodedData['type']) || $decodedData['type'] !== 'attendance') {
-                throw new \Exception('QR Code tidak valid untuk absensi');
-            }
-
-            // Check if QR code is still valid (not expired)
-            if (isset($decodedData['expires_at']) && $decodedData['expires_at'] < time()) {
-                throw new \Exception('QR Code sudah expired, silakan gunakan QR Code yang baru');
-            }
-
-            // Check if gym_id matches
-            if (isset($decodedData['gym_id']) && $decodedData['gym_id'] !== config('app.gym_id', 'gymyankarta')) {
-                throw new \Exception('QR Code tidak valid untuk gym ini');
+            if (!app(\App\Services\AttendanceQr::class)->valid($qrData)) {
+                throw new \Exception('QR absensi tidak valid atau sudah diganti. Scan QR terbaru yang disediakan admin.');
             }
 
             $member = Auth::user();
@@ -333,6 +320,7 @@ class DashboardMember extends Component
             ]);
 
             $this->closeQrScanner();
+            $this->checkTodayAttendance();
             $this->loadCalendarData();
             $this->loadMemberStats();
 
@@ -342,6 +330,7 @@ class DashboardMember extends Component
                 'text' => 'Terima kasih telah berolahraga hari ini. Absensi Anda telah tercatat pada ' . now()->format('H:i') . ' WITA.'
             ]);
         } catch (\Exception $e) {
+            $this->closeQrScanner();
             session()->flash('message', [
                 'type' => 'error',
                 'title' => 'Absen Gagal',
