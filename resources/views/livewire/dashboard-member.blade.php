@@ -557,17 +557,84 @@
 
 @if($showQrScanner)
     <div x-data="{
-        cameraGranted: false, hasError: false, errorMessage: '',
+        cameraGranted: false, hasError: false, errorMessage: '', hint: '',
         isRequesting: false, showStatus: true, showSpinner: true,
         statusMessage: 'Menyiapkan kamera…', isScanning: false,
-        availableCameras: [], isBackCamera: true, html5QrCode: null,
-        processing: false, disposed: false, starting: false,
+        availableCameras: [], isBackCamera: true, cameraIndex: null, manualPick: false,
+        html5QrCode: null, processing: false, disposed: false, starting: false,
         async init() {
             await this.$nextTick();
             for (let n = 0; typeof Html5Qrcode === 'undefined' && n < 20; n++) {
                 await new Promise(resolve => setTimeout(resolve, 250));
             }
             if (!this.disposed) await this.startCamera();
+        },
+        isFrontCamera(camera) {
+            return /front|user|depan|selfie/.test((camera.label || '').toLowerCase());
+        },
+        // Android sering melaporkan beberapa kamera belakang (ultrawide, macro, depth).
+        // Sensor depth/mono tetap mau distart tapi gambarnya hitam, jadi kandidat
+        // diurutkan dari yang paling mungkin kamera utama lalu dicoba satu per satu.
+        cameraCandidates() {
+            const cameras = this.availableCameras;
+            if (!cameras.length) return [{ facingMode: this.isBackCamera ? 'environment' : 'user' }];
+            if (this.cameraIndex !== null) {
+                const chosen = cameras[this.cameraIndex % cameras.length];
+                return [chosen.id, ...cameras.filter(camera => camera.id !== chosen.id).map(camera => camera.id)];
+            }
+            const isExtra = camera => /wide|ultra|depth|macro|tele|zoom|mono|infrared/.test((camera.label || '').toLowerCase());
+            const wanted = cameras.filter(camera => this.isBackCamera ? !this.isFrontCamera(camera) : this.isFrontCamera(camera));
+            const pool = wanted.length ? wanted : cameras;
+            const ordered = [...pool.filter(camera => !isExtra(camera)), ...pool.filter(isExtra)];
+            return [{ facingMode: this.isBackCamera ? 'environment' : 'user' }, ...ordered.map(camera => camera.id)];
+        },
+        scanConfig() {
+            return { fps: 10, disableFlip: false, qrbox: (width, height) => {
+                const size = Math.floor(Math.min(width, height) * 0.8);
+                return { width: size, height: size };
+            } };
+        },
+        async onScan(text) {
+            if (this.processing || this.disposed || this.starting || !this.isScanning) return;
+            this.processing = true;
+            this.showStatus = true;
+            this.showSpinner = true;
+            this.statusMessage = 'QR terbaca. Mencatat absensi…';
+            await this.stopScanner();
+            if (this.disposed) return;
+            try { await @this.call('processQrScan', text); }
+            catch (error) { this.setError('Absensi belum terkirim. Periksa koneksi dan coba lagi.'); }
+            finally { this.processing = false; }
+        },
+        // Tunggu kamera benar-benar mengirim frame; Safari/iOS butuh play() eksplisit.
+        async waitForFrames() {
+            const video = document.querySelector('#qr-reader video');
+            if (!video) return null;
+            video.setAttribute('playsinline', '');
+            video.setAttribute('autoplay', '');
+            video.muted = true;
+            try { await video.play(); } catch (error) {}
+            for (let n = 0; n < 30; n++) {
+                if (this.disposed) return null;
+                if (video.videoWidth > 0 && video.videoHeight > 0 && video.readyState >= 2) return video;
+                await new Promise(resolve => setTimeout(resolve, 100));
+            }
+            return null;
+        },
+        async frameBrightness(video, delay) {
+            if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = 32; canvas.height = 32;
+                const context = canvas.getContext('2d', { willReadFrequently: true });
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                let total = 0;
+                for (let n = 0; n < pixels.length; n += 4) {
+                    total += (pixels[n] * 299 + pixels[n + 1] * 587 + pixels[n + 2] * 114) / 1000;
+                }
+                return total / (pixels.length / 4);
+            } catch (error) { return 255; }
         },
         async startCamera() {
             if (this.starting || this.disposed) return;
@@ -580,39 +647,80 @@
             this.starting = true;
             this.isRequesting = true;
             this.hasError = false;
+            this.hint = '';
             this.showStatus = true;
+            this.showSpinner = true;
             this.statusMessage = 'Mengaktifkan kamera. Izinkan akses kamera jika diminta.';
             try {
                 await this.stopScanner();
-                this.html5QrCode = new Html5Qrcode('qr-reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
-                await this.html5QrCode.start(
-                    { facingMode: this.isBackCamera ? 'environment' : 'user' },
-                    { fps: 10, qrbox: (width, height) => {
-                        const size = Math.floor(Math.min(width, height) * 0.8);
-                        return { width: size, height: size };
-                    } },
-                    async (text) => {
-                        if (this.processing || this.disposed) return;
-                        this.processing = true;
-                        this.showStatus = true;
-                        this.statusMessage = 'QR terbaca. Mencatat absensi…';
-                        await this.stopScanner();
-                        if (this.disposed) return;
-                        try { await @this.call('processQrScan', text); }
-                        catch (error) { this.setError('Absensi belum terkirim. Periksa koneksi dan coba lagi.'); }
-                        finally { this.processing = false; }
-                    }, () => {}
-                );
-                this.isScanning = true;
+                if (!this.availableCameras.length) {
+                    try { this.availableCameras = await Html5Qrcode.getCameras(); } catch (error) {}
+                }
+                if (this.disposed) return;
+                if (!this.html5QrCode) {
+                    this.html5QrCode = new Html5Qrcode('qr-reader', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE] });
+                }
+                const candidates = this.cameraCandidates();
+                const livelyCameras = [];
+                let started = null;
+                for (const [position, candidate] of candidates.entries()) {
+                    if (this.disposed) break;
+                    if (candidates.length > 1) {
+                        this.statusMessage = 'Mencoba kamera ' + (position + 1) + ' dari ' + candidates.length + '…';
+                    }
+                    try { await this.html5QrCode.start(candidate, this.scanConfig(), text => this.onScan(text), () => {}); }
+                    catch (error) { continue; }
+                    this.isScanning = true;
+                    if (this.disposed) { await this.stopScanner(); return; }
+                    const video = await this.waitForFrames();
+                    if (!video) { await this.stopScanner(); continue; }
+                    livelyCameras.push(candidate);
+                    const brightness = await this.frameBrightness(video, 300);
+                    if (this.manualPick || brightness > 6 || await this.frameBrightness(video, 500) > 6) { started = candidate; break; }
+                    await this.stopScanner();
+                }
+                if (!started && livelyCameras.length && !this.disposed) {
+                    // Semua kandidat gelap — kemungkinan ruangannya memang gelap, bukan sensornya.
+                    started = await this.restart(livelyCameras[0]);
+                    this.hint = 'Gambar kamera terlihat gelap. Nyalakan lampu, atau tap ikon ganti kamera.';
+                }
+                if (!started && !livelyCameras.length && !this.disposed) {
+                    // deviceId ditolak browser (atau daftar kamera basi) — balik ke cara lama.
+                    started = await this.restart({ facingMode: this.isBackCamera ? 'environment' : 'user' });
+                }
                 if (this.disposed) { await this.stopScanner(); return; }
+                if (!started) throw new Error('camera-unusable');
+                this.rememberCamera(started);
                 this.cameraGranted = true;
                 this.showStatus = false;
-                const video = document.querySelector('#qr-reader video');
-                if (video) video.setAttribute('playsinline', '');
-                try { this.availableCameras = await Html5Qrcode.getCameras(); } catch (error) {}
             } catch (error) {
-                this.setError('Kamera tidak dapat dibuka. Izinkan kamera di pengaturan browser, tutup aplikasi lain yang memakai kamera, lalu coba lagi.');
-            } finally { this.starting = false; this.isRequesting = false; }
+                await this.stopScanner();
+                if (this.disposed) return;
+                this.setError('Kamera tidak dapat dibuka. Izinkan kamera di pengaturan browser, tutup aplikasi lain yang sedang memakai kamera, lalu coba lagi.');
+            } finally { this.starting = false; this.isRequesting = false; this.manualPick = false; }
+        },
+        async restart(candidate) {
+            try {
+                await this.stopScanner();
+                if (this.disposed) return null;
+                await this.html5QrCode.start(candidate, this.scanConfig(), text => this.onScan(text), () => {});
+                this.isScanning = true;
+                if (!await this.waitForFrames() || this.disposed) {
+                    await this.stopScanner();
+                    return null;
+                }
+                return candidate;
+            } catch (error) { return null; }
+        },
+        rememberCamera(cameraId) {
+            const video = document.querySelector('#qr-reader video');
+            const settings = video?.srcObject?.getVideoTracks()[0]?.getSettings() || {};
+            const id = settings.deviceId || cameraId;
+            if (settings.facingMode) this.isBackCamera = settings.facingMode !== 'user';
+            const index = this.availableCameras.findIndex(camera => camera.id === id);
+            if (index === -1) return;
+            this.cameraIndex = index;
+            if (!settings.facingMode) this.isBackCamera = !this.isFrontCamera(this.availableCameras[index]);
         },
         async stopScanner() {
             if (this.html5QrCode && this.isScanning) {
@@ -623,7 +731,21 @@
         async switchCamera() {
             if (this.starting || this.processing) return;
             this.isBackCamera = !this.isBackCamera;
+            this.cameraIndex = null;
             await this.startCamera();
+        },
+        async selectCamera(value) {
+            if (this.starting || this.processing || this.disposed) return;
+            const index = Number(value);
+            if (!Number.isInteger(index) || !this.availableCameras[index]) return;
+            this.cameraIndex = index;
+            this.manualPick = true;
+            await this.startCamera();
+        },
+        cameraLabel() {
+            const name = this.isBackCamera ? 'Kamera Belakang' : 'Kamera Depan';
+            if (this.availableCameras.length < 2 || this.cameraIndex === null) return name;
+            return name + ' ' + (this.cameraIndex + 1) + '/' + this.availableCameras.length;
         },
         async closeScanner() {
             this.disposed = true;
@@ -643,7 +765,7 @@
                 <div class="flex items-center space-x-2">
                     <!-- ✅ TAMBAHAN: Camera Switch Button -->
                     <button @click="switchCamera()" 
-                            x-show="isScanning && availableCameras.length > 1"
+                            x-show="isScanning" :disabled="starting || processing"
                             class="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
                             :title="isBackCamera ? 'Beralih ke Kamera Depan' : 'Beralih ke Kamera Belakang'">
                         <i class="fas fa-sync-alt text-lg"></i>
@@ -662,7 +784,7 @@
                     <div class="bg-blue-50 rounded-lg p-3 mb-4">
                         <p class="text-xs text-blue-800">
                             <i class="fas fa-info-circle mr-1"></i>
-                            Gunakan kamera belakang. Pastikan seluruh QR terlihat, hindari pantulan, dan tahan HP sebentar.
+                            Gunakan kamera belakang atau depan. Pastikan seluruh QR terlihat, hindari pantulan, dan tahan HP sebentar.
                         </p>
                     </div>
                 </div>
@@ -687,7 +809,7 @@
                     </div>
                     
                     <!-- ✅ TAMBAHAN: Camera Switch Button (In-Camera) -->
-                    <div x-show="isScanning && !showStatus && availableCameras.length > 1" 
+                    <div x-show="isScanning && !showStatus"
                          class="absolute top-4 right-4 z-10">
                         <button @click="switchCamera()" 
                                 class="p-3 bg-black bg-opacity-50 text-white rounded-full hover:bg-opacity-70 transition-all"
@@ -724,8 +846,19 @@
                 <div x-show="isScanning && !showStatus" class="mt-3 text-center">
                     <div class="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">
                         <i :class="isBackCamera ? 'fas fa-camera' : 'fas fa-camera-rotate'"></i>
-                        <span x-text="isBackCamera ? 'Kamera Belakang' : 'Kamera Depan'"></span>
+                        <span x-text="cameraLabel()"></span>
                     </div>
+                    <div x-show="availableCameras.length > 1" class="mt-3">
+                        <label for="attendance-camera" class="block text-sm text-gray-600 mb-1">Pilih kamera jika gambar gelap</label>
+                        <select id="attendance-camera" :value="cameraIndex ?? ''" @change="selectCamera($event.target.value)"
+                                :disabled="starting || processing" class="w-full rounded-lg border border-gray-300 p-2 text-sm">
+                            <option value="" disabled>Pilih kamera</option>
+                            <template x-for="(camera, index) in availableCameras" :key="camera.id">
+                                <option :value="index" x-text="camera.label || ('Kamera ' + (index + 1))"></option>
+                            </template>
+                        </select>
+                    </div>
+                    <p x-show="hint" x-text="hint" class="mt-2 text-xs text-amber-700"></p>
                 </div>
                 
                 <!-- Instructions -->
@@ -738,7 +871,7 @@
                         <i class="fas fa-check text-green-500 mr-2 w-4"></i>
                         <span>Pastikan pencahayaan cukup terang</span>
                     </div>
-                    <div class="flex items-center" x-show="availableCameras.length > 1">
+                    <div class="flex items-center" x-show="cameraGranted">
                         <i class="fas fa-sync-alt text-blue-500 mr-2 w-4"></i>
                         <span>Tap ikon switch untuk beralih kamera</span>
                     </div>
